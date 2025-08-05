@@ -19,16 +19,18 @@ export default function Jumbotron() {
 
       <div
         className="absolute inset-0 bg-cover bg-center opacity-20"
-        style={{ backgroundImage: "url('/images/d03fcb52-6eec-44cc-ae31-fe6aa891e404.png')" }}
+        style={{
+          backgroundImage:
+            "url('/images/d03fcb52-6eec-44cc-ae31-fe6aa891e404.png')",
+        }}
       ></div>
-
 
       <div className="relative z-10 max-w-4xl mx-auto text-center md:text-left">
         <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-4 leading-tight">
           Bienvenido a <span className="text-yellow-300">CAPRES</span>
         </h1>
         <p className="text-lg md:text-xl lg:text-2xl text-blue-100 max-w-2xl mx-auto md:mx-0 mb-8">
-          La Caja de Ahorros y Previsión de los empleados del SENIAT,
+          La Caja de Ahorro y Previsión de los empleados del SENIAT,
           comprometida con tu bienestar económico y el de tu familia.
         </p>
 
