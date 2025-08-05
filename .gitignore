@@ -16,6 +16,7 @@ yarn-error.log*
 .env.production.local
 .env.test.local
 .env.example
+.env
 
 # Logs
 *.log
@@ -23,3 +24,9 @@ yarn-error.log*
 # Sistema
 .DS_Store
 Thumbs.db
+
+# Archivos de entorno
+#.env
+# .env.local
+# .env.production
+# .env.development
