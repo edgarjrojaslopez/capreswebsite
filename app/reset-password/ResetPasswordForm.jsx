@@ -1,123 +1,95 @@
 // app/reset-password/ResetPasswordForm.jsx
-
 'use client';
 
 import { useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
-export default function ResetPasswordForm() {
+export default function ResetPasswordForm({ token }) {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
-
-  const searchParams = useSearchParams();
-  const token = searchParams.get('token');
+  const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
     setMessage('');
-    setLoading(true);
 
     if (password !== confirmPassword) {
-      setMessage('Las contraseñas no coinciden');
-      setLoading(false);
+      setError('Las contraseñas no coinciden.');
       return;
     }
 
     if (password.length < 6) {
-      setMessage('La contraseña debe tener al menos 6 caracteres');
-      setLoading(false);
+      setError('La contraseña debe tener al menos 6 caracteres.');
       return;
     }
+
+    setLoading(true);
 
     try {
       const res = await fetch('/api/auth/reset-password', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ token, newPassword: password }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token, password }),
       });
 
       const data = await res.json();
 
-      if (res.ok) {
-        setMessage('Contraseña actualizada. Redirigiendo...');
-        setTimeout(() => {
-          window.location.href = '/login';
-        }, 2000);
-      } else {
-        setMessage(data.error || 'Token inválido o expirado');
+      if (!res.ok) {
+        throw new Error(data.error || 'No se pudo restablecer la contraseña.');
       }
-    } catch (error) {
-      setMessage('Error de conexión con el servidor.');
+
+      setMessage('¡Contraseña actualizada con éxito! Serás redirigido al inicio de sesión.');
+      setTimeout(() => {
+        router.push('/login');
+      }, 3000);
+
+    } catch (err) {
+      setError(err.message);
     } finally {
       setLoading(false);
     }
   };
 
-  if (!token) {
-    return (
-      <div className="text-center py-8 text-red-600">
-        <h3 className="text-lg font-semibold">Token no válido</h3>
-        <p className="text-sm">El enlace ha expirado o es incorrecto.</p>
-      </div>
-    );
-  }
-
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      <h2 className="text-2xl font-bold text-center">Restablecer Contraseña</h2>
       <div>
-        <label
-          htmlFor="password"
-          className="block text-sm font-medium text-gray-700 mb-1"
-        >
-          Nueva Contraseña
-        </label>
+        <label htmlFor="password" className="block text-sm font-medium text-gray-700">Nueva Contraseña</label>
         <input
-          type="password"
           id="password"
+          type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md"
-          placeholder="Mínimo 6 caracteres"
           required
-          minLength="6"
+          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
         />
       </div>
       <div>
-        <label
-          htmlFor="confirm"
-          className="block text-sm font-medium text-gray-700 mb-1"
-        >
-          Confirmar Contraseña
-        </label>
+        <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">Confirmar Nueva Contraseña</label>
         <input
+          id="confirmPassword"
           type="password"
-          id="confirm"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md"
           required
+          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
         />
       </div>
-      <button
-        type="submit"
-        disabled={loading}
-        className="w-full py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-blue-300"
-      >
-        {loading ? 'Guardando...' : 'Guardar Contraseña'}
-      </button>
-      {message && (
-        <p
-          className={`text-center text-sm ${
-            message.includes('éxito') ? 'text-green-600' : 'text-red-600'
-          }`}
+      <div>
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
         >
-          {message}
-        </p>
-      )}
+          {loading ? 'Actualizando...' : 'Restablecer Contraseña'}
+        </button>
+      </div>
+      {error && <p className="text-red-600 text-center">{error}</p>}
+      {message && <p className="text-green-600 text-center">{message}</p>}
     </form>
   );
 }
