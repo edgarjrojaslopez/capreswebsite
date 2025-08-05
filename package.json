@@ -1,0 +1,34 @@
+{
+  "name": "capres-web",
+  "version": "1.0.1",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@sanity/icons": "^3.7.4",
+    "@sanity/image-url": "^1.1.0",
+    "@sanity/vision": "^4.2.0",
+    "bcryptjs": "^3.0.2",
+    "date-fns": "^4.1.0",
+    "dotenv": "^17.2.0",
+    "drizzle-orm": "^0.28.0",
+    "jose": "^5.2.0",
+    "jsonwebtoken": "^9.0.0",
+    "lucide-react": "^0.536.0",
+    "mysql2": "^3.14.2",
+    "next": "latest",
+    "nodemailer": "^7.0.5",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "styled-components": "^6.1.19",
+    "xlsx": "^0.18.5",
+    "zod": "^3.22.2"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.17"
+  }
+}
