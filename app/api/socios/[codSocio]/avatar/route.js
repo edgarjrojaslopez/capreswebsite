@@ -1,85 +1,93 @@
-// app/api/socios/[codSocio]/avatar/route.js
-import { writeFile, mkdir } from 'fs/promises';
-import { join } from 'path';
+import { put } from '@vercel/blob';
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { socios } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 
-const UPLOAD_DIR = join(process.cwd(), 'public', 'uploads', 'avatars');
-
-// Helper function to ensure the upload directory exists
-async function ensureUploadDir() {
-  try {
-    await mkdir(UPLOAD_DIR, { recursive: true });
-  } catch (error) {
-    // This error is okay if the directory already exists
-    if (error.code !== 'EEXIST') {
-      console.error('Error creating upload directory:', error);
-      throw new Error('Could not create upload directory.');
-    }
+// Validación de autorización (puedes mejorarla con JWT si lo necesitas)
+async function checkAuth(request) {
+  const token = request.headers.get('Authorization')?.split(' ')[1];
+  if (!token) {
+    return { authorized: false, error: 'No autorizado' };
   }
+
+  // Aquí podrías validar el token (ej: JWT, o comparar con uno secreto)
+  // Por ahora, solo verificamos que exista.
+  // TODO: Implementa validación real si es necesario.
+  return { authorized: true };
 }
 
 export async function PUT(request, { params }) {
   const { codSocio } = params;
 
-  // Authorization check
-  const token = request.headers.get('Authorization')?.split(' ')[1];
-  if (!token) {
-    return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+  // Verificar autorización
+  const auth = await checkAuth(request);
+  if (!auth.authorized) {
+    return NextResponse.json({ error: auth.error }, { status: 401 });
   }
 
   try {
-    // Get the form data from the request
     const formData = await request.formData();
-    const file = formData.get('avatar'); // 'avatar' must match the key from the frontend
+    const file = formData.get('avatar');
 
     if (!file) {
-      return NextResponse.json({ error: 'No se subió ningún archivo.' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'No se subió ningún archivo.' },
+        { status: 400 }
+      );
     }
 
-    // Check if the file is an image
     if (!file.type.startsWith('image/')) {
-      return NextResponse.json({ error: 'El archivo debe ser una imagen.' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'El archivo debe ser una imagen.' },
+        { status: 400 }
+      );
     }
 
-    // Ensure the upload directory exists
-    await ensureUploadDir();
-
-    // Create a buffer from the file
+    // Leer el archivo como ArrayBuffer
     const fileBuffer = Buffer.from(await file.arrayBuffer());
 
-    // Create a unique filename
-    const ext = file.name.match(/\.[0-9a-z]+$/i)?.[0] || '.jpg';
-    const fileName = `avatar-${codSocio}-${Date.now()}${ext}`; // Add timestamp to prevent caching issues
-    const filePath = join(UPLOAD_DIR, fileName);
+    // Generar un nombre único
+    const ext = file.name.match(/\.[0-9a-z]+$/i)?.[0] || '.png';
+    const fileName = `avatar-${codSocio}-${Date.now()}${ext}`;
 
-    // Write the file to the filesystem
-    await writeFile(filePath, fileBuffer);
+    // Subir a Vercel Blob
+    const blob = await put(`avatars/${fileName}`, fileBuffer, {
+      access: 'public', // La URL será pública
+      contentType: file.type,
+    });
 
-    // Generate the public URL for the avatar
-    const avatarUrl = `/uploads/avatars/${fileName}`;
+    const avatarUrl = blob.url; // URL pública del avatar
 
-    // Update the user's record in the database using Drizzle
+    // Actualizar en la base de datos
     const result = await db
       .update(socios)
       .set({ avatar: avatarUrl })
       .where(eq(socios.CodSocio, codSocio));
 
-    if (result.affectedRows === 0) {
-        // This case might happen if codSocio is invalid
-        return NextResponse.json({ error: 'Socio no encontrado.' }, { status: 404 });
+    if (result.rowsAffected === 0) {
+      return NextResponse.json(
+        { error: 'Socio no encontrado.' },
+        { status: 404 }
+      );
     }
 
-    // Return a success response
+    // Responder con éxito
     return NextResponse.json({
       avatarUrl,
       message: 'Avatar actualizado correctamente',
     });
-
   } catch (error) {
     console.error('Error en /api/socios/[codSocio]/avatar:', error);
+
+    // Si el error es específico de Blob (ej: token faltante)
+    if (error.message.includes('BLOB_READ_WRITE_TOKEN')) {
+      return NextResponse.json(
+        { error: 'Configuración de almacenamiento no válida.' },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json(
       { error: 'Error interno del servidor', details: error.message },
       { status: 500 }
