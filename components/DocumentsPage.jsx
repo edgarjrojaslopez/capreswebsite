@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 
 export default function DocumentsPage() {
   const [documents, setDocuments] = useState({
@@ -151,7 +152,12 @@ export default function DocumentsPage() {
               setTimeout(() => document.getElementById('contact'), 500)
             }
           >
-            Contáctanos
+            <Link
+              href="/contact"
+              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:bg-blue-300 transition-colors"
+            >
+              Contacto
+            </Link>
           </button>
         </div>
       </section>
