@@ -7,11 +7,17 @@ import { v4 as uuidv4 } from 'uuid';
 // GET: Obtener todas las noticias
 export async function GET() {
   try {
-    const allNoticias = await db.select().from(noticias).orderBy(noticias.fechaCreacion, 'desc');
+    const allNoticias = await db
+      .select()
+      .from(noticias)
+      .orderBy(noticias.fechaCreacion, 'desc');
     return NextResponse.json(allNoticias);
   } catch (error) {
     console.error('Error al obtener las noticias:', error);
-    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Error interno del servidor' },
+      { status: 500 }
+    );
   }
 }
 
@@ -21,7 +27,10 @@ export async function POST(req) {
     const { titulo, resumen, contenido, imagenUrl } = await req.json();
 
     if (!titulo || !contenido) {
-      return NextResponse.json({ error: 'El título y el contenido son obligatorios' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'El título y el contenido son obligatorios' },
+        { status: 400 }
+      );
     }
 
     const nuevaNoticia = {
@@ -38,6 +47,9 @@ export async function POST(req) {
     return NextResponse.json(nuevaNoticia, { status: 201 });
   } catch (error) {
     console.error('Error al crear la noticia:', error);
-    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Error interno del servidor' },
+      { status: 500 }
+    );
   }
 }

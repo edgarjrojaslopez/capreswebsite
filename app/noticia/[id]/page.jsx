@@ -55,12 +55,12 @@ export default async function NoticiaPage({ params }) {
 
         {noticia.imagenUrl && (
           <div className="relative w-full h-64 sm:h-96 mb-8 rounded-lg overflow-hidden">
-            <Image
+            <img
               src={noticia.imagenUrl}
               alt={`Imagen para ${noticia.titulo}`}
               layout="fill"
               objectFit="cover"
-              className="bg-gray-200"
+              className="w-full h-64 object-cover rounded-2xl mb-6"
             />
           </div>
         )}

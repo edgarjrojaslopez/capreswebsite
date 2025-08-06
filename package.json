@@ -10,6 +10,7 @@
     "@sanity/icons": "^3.7.4",
     "@sanity/image-url": "^1.1.0",
     "@sanity/vision": "^4.2.0",
+    "@vercel/blob": "^1.1.1",
     "bcryptjs": "^3.0.2",
     "date-fns": "^4.1.0",
     "dotenv": "^17.2.0",
