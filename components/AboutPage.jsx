@@ -32,13 +32,17 @@ export default function AboutPage() {
         <h3 className="text-2xl font-semibold mb-4">
           Consejo de Administración
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-white p-4 mb-6 rounded-lg shadow text-center">
+          <img
+            src="avatar-default.png"
+            alt="Presidente Capres"
+            className="w-24 h-24 mx-auto rounded-full mb-4"
+          />
+          <h4 className="font-semibold text-lg md:text-2xl">Eloy Noriega</h4>
+          <p className="text-gray-600 text-lg">Presidente</p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {[
-            {
-              name: 'Eloy Noriega',
-              role: 'Presidente',
-              image: 'https://placehold.co/300x300?text=Presidente',
-            },
             {
               name: 'Raúl Lucena',
               role: 'Tesorero',
@@ -54,13 +58,8 @@ export default function AboutPage() {
               key={index}
               className="bg-white p-4 rounded-lg shadow text-center"
             >
-              <img
-                src={member.image}
-                alt={member.name}
-                className="w-24 h-24 mx-auto rounded-full mb-4"
-              />
-              <h4 className="font-semibold">{member.name}</h4>
-              <p className="text-gray-600 text-sm">{member.role}</p>
+              <h4 className="font-semibold md:text-lg">{member.name}</h4>
+              <p className="text-gray-600 text-sm md:text-lg">{member.role}</p>
             </div>
           ))}
         </div>
@@ -91,13 +90,8 @@ export default function AboutPage() {
               key={index}
               className="bg-white p-4 rounded-lg  shadow text-center"
             >
-              <img
-                src={member.image}
-                alt={member.name}
-                className="w-24 h-24 mx-auto rounded-full mb-4"
-              />
-              <h4 className="font-semibold">{member.name}</h4>
-              <p className="text-gray-600 text-sm">{member.role}</p>
+              <h4 className="font-semibold md:text-lg">{member.name}</h4>
+              <p className="text-gray-600 text-sm md:text-lg">{member.role}</p>
             </div>
           ))}
         </div>
@@ -127,13 +121,8 @@ export default function AboutPage() {
               key={index}
               className="bg-white p-4 rounded-lg shadow text-center"
             >
-              <img
-                src={member.image}
-                alt={member.name}
-                className="w-24 h-24 mx-auto rounded-full mb-4"
-              />
-              <h4 className="font-semibold">{member.name}</h4>
-              <p className="text-gray-600 text-sm">{member.role}</p>
+              <h4 className="font-semibold md:text-lg">{member.name}</h4>
+              <p className="text-gray-600 text-sm md:text-lg">{member.role}</p>
             </div>
           ))}
         </div>
@@ -164,13 +153,8 @@ export default function AboutPage() {
               key={index}
               className="bg-white p-4 rounded-lg shadow text-center"
             >
-              <img
-                src={member.image}
-                alt={member.name}
-                className="w-24 h-24 mx-auto rounded-full mb-4"
-              />
-              <h4 className="font-semibold">{member.name}</h4>
-              <p className="text-gray-600 text-sm">{member.role}</p>
+              <h4 className="font-semibold md:text-lg">{member.name}</h4>
+              <p className="text-gray-600 text-sm md:text-lg">{member.role}</p>
             </div>
           ))}
         </div>

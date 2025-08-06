@@ -24,33 +24,45 @@ export default function Jumbotron() {
             "url('/images/d03fcb52-6eec-44cc-ae31-fe6aa891e404.png')",
         }}
       ></div>
-
-      <div className="relative z-10 max-w-4xl mx-auto text-center md:text-left">
-        <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-4 leading-tight">
-          Bienvenido a <span className="text-yellow-300">CAPRES</span>
+      <div className="relative z-10 max-w-4xl mx-auto text-center md:text-left px-4">
+        {/* Título principal */}
+        <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-4 md:mb-6 ">
+          <span className="text-yellow-300 py-1 rounded-lg shadow-sm">
+            CAPRES
+          </span>
         </h1>
-        <p className="text-lg md:text-xl lg:text-2xl text-blue-100 max-w-2xl mx-auto md:mx-0 mb-8">
-          La Caja de Ahorro y Previsión de los empleados del SENIAT,
-          comprometida con tu bienestar económico y el de tu familia.
+
+        {/* Subtítulo mejorado */}
+        <p className="text-lg md:text-xl lg:text-2xl text-blue-100 max-w-2xl mx-auto md:mx-0 mb-8 leading-relaxed">
+          Tu socio financiero dentro del SENIAT.{' '}
+          <span className="block md:inline mt-2 md:mt-0">
+            <span className="text-white font-semibold">
+              Ahorra con beneficios, invierte con confianza
+            </span>{' '}
+            y accede a préstamos personalizados, diseñados especialmente para
+            tí.
+          </span>
         </p>
 
         {/* Botón de Iniciar Sesión */}
         <Link
           href="/login"
           className="
-            inline-block
-            bg-white text-blue-800
-            font-semibold
-            px-8 py-3
-            rounded-lg
-            shadow-md
-            hover:bg-blue-50
-            transition-colors
-            duration-200
-            text-lg
-            md:text-base
-            mx-auto md:mx-0
-          "
+      inline-block
+      bg-white text-blue-800
+      font-bold
+      px-8 py-4
+      rounded-xl
+      shadow-lg
+      hover:bg-blue-50
+      hover:shadow-xl
+      transition-all
+      duration-300
+      text-lg
+      mx-auto md:mx-0
+      transform hover:scale-105
+      focus:outline-none focus:ring-4 focus:ring-white focus:ring-opacity-50
+    "
         >
           Iniciar Sesión
         </Link>
