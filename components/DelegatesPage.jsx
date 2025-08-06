@@ -92,48 +92,87 @@ export default function DelegatesPage() {
         <div className="bg-white p-6 rounded-lg shadow">
           <p>
             Los delegados son representantes electos por los socios para
-            participar en las asambleas y reuniones de la junta directiva. Su
-            función principal es defender los intereses de los socios de su
-            región y servir como enlace entre los asociados y la administración.
+            participar en las asambleas y reuniones de la junta directiva del
+            consejo de administración. Su función principal es defender los
+            intereses de los socios de su región y servir como enlace entre los
+            asociados y la administración.
           </p>
         </div>
       </section>
 
-      <section>
+      <section className="mt-8">
         <h3 className="text-2xl font-semibold mb-4">Lista de Delegados</h3>
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Región
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Nombre
-                </th>
 
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Cédula
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {delegates.map((delegate, index) => (
-                <tr key={index}>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {delegate.region}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {delegate.nombre}
-                  </td>
-
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {delegate.cedula}
-                  </td>
+        {/* Tabla para desktop */}
+        <div className="hidden md:block overflow-x-auto">
+          <div className="bg-white rounded-lg shadow min-w-full">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Región
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Nombre
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Cédula
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {delegates.map((delegate, index) => (
+                  <tr
+                    key={index}
+                    className="hover:bg-gray-50 transition-colors duration-150"
+                  >
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                      {delegate.region}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      {delegate.nombre}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                      {delegate.cedula}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Tarjetas para móvil (responsive) */}
+        <div className="md:hidden space-y-4">
+          {delegates.map((delegate, index) => (
+            <div
+              key={index}
+              className="bg-white p-4 rounded-lg shadow border border-gray-200 space-y-3"
+            >
+              <div>
+                <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                  Región
+                </span>
+                <p className="text-sm text-gray-700 mt-1">{delegate.region}</p>
+              </div>
+
+              <div>
+                <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                  Nombre
+                </span>
+                <p className="text-sm font-semibold text-gray-900 mt-1">
+                  {delegate.nombre}
+                </p>
+              </div>
+
+              <div>
+                <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                  Cédula
+                </span>
+                <p className="text-sm text-gray-700 mt-1">{delegate.cedula}</p>
+              </div>
+            </div>
+          ))}
         </div>
       </section>
     </div>
