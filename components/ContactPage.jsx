@@ -169,7 +169,7 @@ export default function ContactPage() {
               </svg>
               <div>
                 <h4 className="font-semibold">Teléfono</h4>
-                <p>+58 0212-7092111</p>
+                <p>+58 0212-7094756</p>
               </div>
             </div>
 
