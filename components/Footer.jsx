@@ -50,7 +50,7 @@ export default function Footer() {
 
           {/* Columna 3: Soporte */}
           <div>
-            <h3 className="font-bold mb-4">Soporte</h3>
+            <h3 className="font-bold mb-4">Soporte </h3>
             <ul className="space-y-2 text-sm">
               <li>
                 <Link href="/contact" className="hover:underline transition">
