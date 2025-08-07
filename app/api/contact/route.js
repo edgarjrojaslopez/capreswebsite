@@ -17,18 +17,7 @@ export async function POST(req) {
       );
     }
 
-    });
-
-    // Verificar conexión antes de enviar
-    try {
-      await transporter.verify();
-      console.log('✅ Conexión SMTP exitosa');
-    } catch (verifyError) {
-      console.error('❌ Error de conexión SMTP:', verifyError);
-      throw verifyError;
-    }
-
-    // Correo para CAPRES
+    // Correo para  CAPRES
     const mailToCapres = {
       from: process.env.EMAIL_USER,
       to: 'testmail@capres.com.ve',
