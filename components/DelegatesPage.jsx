@@ -150,25 +150,16 @@ export default function DelegatesPage() {
               className="bg-white p-4 rounded-lg shadow border border-gray-200 space-y-3"
             >
               <div>
-                <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-                  Región
-                </span>
                 <p className="text-sm text-gray-700 mt-1">{delegate.region}</p>
               </div>
 
               <div>
-                <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-                  Nombre
-                </span>
                 <p className="text-sm font-semibold text-gray-900 mt-1">
                   {delegate.nombre}
                 </p>
               </div>
 
               <div>
-                <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-                  Cédula
-                </span>
                 <p className="text-sm text-gray-700 mt-1">{delegate.cedula}</p>
               </div>
             </div>
