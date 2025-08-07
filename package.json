@@ -7,6 +7,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@heroicons/react": "^2.2.0",
     "@sanity/icons": "^3.7.4",
     "@sanity/image-url": "^1.1.0",
     "@sanity/vision": "^4.2.0",
@@ -15,6 +16,7 @@
     "date-fns": "^4.1.0",
     "dotenv": "^17.2.0",
     "drizzle-orm": "^0.28.0",
+    "heroicons": "^2.2.0",
     "jose": "^5.2.0",
     "jsonwebtoken": "^9.0.0",
     "lucide-react": "^0.536.0",

@@ -1,9 +1,13 @@
 import { NextResponse } from 'next/server';
-import nodemailer from 'nodemailer';
+import {
+  sendContactFormToAdmin,
+  sendContactConfirmationToUser,
+} from '@/lib/mail';
 
 export async function POST(req) {
   try {
-    const { nombre, email, asunto, mensaje } = await req.json();
+    const body = await req.json();
+    const { nombre, email, asunto, mensaje } = body;
 
     // Validaciones básicas
     if (!nombre || !email || !asunto || !mensaje) {
@@ -13,17 +17,6 @@ export async function POST(req) {
       );
     }
 
-    // Configurar transporter de nodemailer con debug
-    const transporter = nodemailer.createTransport({
-      host: 'mail.capres.com.ve',
-      port: 465,
-      secure: true,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-      debug: true, // Para ver más detalles del error
-      logger: true, // Para logging detallado
     });
 
     // Verificar conexión antes de enviar

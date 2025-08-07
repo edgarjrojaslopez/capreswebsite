@@ -22,7 +22,7 @@ export default function Footer() {
               />
             </Link>
             <p className="text-sm text-blue-100">
-              Caja de Ahorros y Previsión de los empleados del SENIAT
+              Caja de Ahorro y Previsión de los empleados del SENIAT
             </p>
           </div>
 

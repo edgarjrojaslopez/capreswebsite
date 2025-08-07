@@ -1,64 +1,87 @@
 // app/api/auth/forgot-password/route.js
-import { db } from '@/lib/db';
-import { socios } from '@/lib/db/schema';
-import { eq } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
-import crypto from 'crypto';
-import { sendPasswordResetEmail } from '@/lib/email';
+import { db } from '@/lib/db';
+import { socios, passwordResetTokens } from '@/lib/db/schema';
+import { eq } from 'drizzle-orm';
+import { randomBytes, createHash } from 'crypto';
+import { sendPasswordResetEmail } from '@/lib/mail';
 
-export async function POST(req) {
+export async function POST(request) {
   try {
-    const { cedula, email } = await req.json();
-
-    if (!cedula) {
-      return NextResponse.json({ error: 'La cédula es obligatoria' }, { status: 400 });
+    // Validar Content-Type
+    const contentType = request.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      return NextResponse.json(
+        { error: 'Formato inválido (se requiere JSON)' },
+        { status: 415 }
+      );
     }
 
-    // Buscar al socio por su CodSocio (cédula)
-    const socio = await db.select().from(socios).where(eq(socios.CodSocio, cedula)).limit(1);
+    // Leer y validar cuerpo
+    const body = await request.json();
+    const { email } = body;
 
-    if (socio.length === 0) {
-      return NextResponse.json({ error: 'Socio no encontrado' }, { status: 404 });
+    if (!email || typeof email !== 'string' || email.trim() === '') {
+      return NextResponse.json(
+        { error: 'El campo email es requerido' },
+        { status: 400 }
+      );
     }
 
-    const user = socio[0];
+    const normalizedEmail = email.trim().toLowerCase();
 
-    // Si el socio no tiene email y no se ha proporcionado uno nuevo
-    if (!user.Email && !email) {
-      return NextResponse.json({ requiresEmail: true });
+    // Respuesta genérica por seguridad
+    const successResponse = {
+      message:
+        'Si el correo está registrado, recibirás un enlace de recuperación en breve.',
+    };
+
+    // Buscar usuario
+    const [user] = await db
+      .select()
+      .from(socios)
+      .where(eq(socios.Email, normalizedEmail))
+      .limit(1);
+
+    if (!user) {
+      return NextResponse.json(successResponse);
     }
 
-    const userEmail = email || user.Email;
+    // Generar token seguro
+    const resetToken = randomBytes(32).toString('hex');
+    const hashedToken = createHash('sha256').update(resetToken).digest('hex');
+    const expiresAt = new Date(Date.now() + 3600000); // 1 hora
 
-    // Generar token de reseteo
-    const resetToken = crypto.randomBytes(32).toString('hex');
-    const passwordResetToken = crypto.createHash('sha256').update(resetToken).digest('hex');
-    const passwordResetExpires = new Date(Date.now() + 3600000); // 1 hora de expiración
+    // Eliminar tokens existentes para este usuario
+    await db
+      .delete(passwordResetTokens)
+      .where(eq(passwordResetTokens.userId, user.CodSocio));
 
-    // Actualizar el socio con el token y, si es necesario, el nuevo email
-    await db.update(socios)
-      .set({
-        reset_token: passwordResetToken,
-        reset_token_expires: passwordResetExpires,
-        ...(email && { Email: email }), // Actualiza el email si se proporcionó uno nuevo
-      })
-      .where(eq(socios.CodSocio, cedula));
+    // Guardar nuevo token
+    await db.insert(passwordResetTokens).values({
+      userId: user.CodSocio,
+      token: hashedToken,
+      expiresAt,
+    });
 
-    // Enviar el correo de restablecimiento
+    // Enviar correo (manejar errores silenciosamente)
     try {
-      await sendPasswordResetEmail(userEmail, resetToken);
-      return NextResponse.json({ message: 'Correo de restablecimiento enviado' });
-    } catch (error) {
-      console.error('Error al enviar el correo:', error);
-      // Revertir la actualización de la base de datos si el correo falla
-      await db.update(socios)
-        .set({ reset_token: null, reset_token_expires: null })
-        .where(eq(socios.CodSocio, cedula));
-      return NextResponse.json({ error: 'No se pudo enviar el correo de restablecimiento' }, { status: 500 });
+      await sendPasswordResetEmail({
+        email: user.Email,
+        token: resetToken,
+        name: user.Nombre,
+      });
+    } catch (emailError) {
+      console.error('Error enviando correo:', emailError);
+      // No revelar error al cliente
     }
 
+    return NextResponse.json(successResponse);
   } catch (error) {
-    console.error('Error en forgot-password:', error);
-    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
+    console.error('Error en /api/auth/forgot-password:', error);
+    return NextResponse.json(
+      { error: 'Error interno del servidor' },
+      { status: 500 }
+    );
   }
 }
