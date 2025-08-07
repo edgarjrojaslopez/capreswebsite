@@ -170,6 +170,7 @@ export default function ContactPage() {
               <div>
                 <h4 className="font-semibold">Teléfono</h4>
                 <p>+58 0212-7094756</p>
+                <p>+58 0212-7094761</p>
               </div>
             </div>
 
@@ -197,7 +198,7 @@ export default function ContactPage() {
           <div className="bg-white p-6 rounded-lg shadow">
             <h3 className="text-xl font-semibold mb-4">Horario de Atención</h3>
             <ul className="space-y-2 text-gray-600">
-              <li>Lunes a Viernes: 8:00 AM - 3:00 PM</li>
+              <li>Lunes a Viernes: 8:00 AM - 4:00 PM</li>
             </ul>
           </div>
         </div>
