@@ -169,8 +169,10 @@ export default function ContactPage() {
               </svg>
               <div>
                 <h4 className="font-semibold">Teléfono</h4>
-                <p>+58 0212-7094756</p>
-                <p>+58 0212-7094761</p>
+                <p>+58 0212-7094764</p>
+                <p>+58 0212-7094758</p>
+                <p>+58 0212-7094746</p>
+                <p>+58 0212-7094751</p>
               </div>
             </div>
 
