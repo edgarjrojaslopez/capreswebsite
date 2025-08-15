@@ -56,10 +56,10 @@ export default function DocumentsPage() {
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-white divide-y font-bold divide-gray-200">
             {documents.map((doc, index) => (
               <tr key={index} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
+                <td className="px-6 py-4 whitespace-nowrap  text-gray-900">
                   {doc.name}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">

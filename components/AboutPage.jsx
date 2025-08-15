@@ -3,7 +3,7 @@
 export default function AboutPage() {
   return (
     <div>
-      <h2 className="text-3xl font-bold mb-6">Sobre Nosotros</h2>
+      <h2 className="text-3xl font-bold mb-6">¿Quiénes somos?</h2>
 
       <section className="mb-12">
         <h3 className="text-2xl font-semibold mb-4">Historia de CAPRES</h3>
