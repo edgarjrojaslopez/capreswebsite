@@ -75,7 +75,7 @@ export async function POST(request) {
       console.error('Error enviando correo:', emailError);
       // No revelar error al cliente
     }
-
+    //
     return NextResponse.json(successResponse);
   } catch (error) {
     console.error('Error en /api/auth/forgot-password:', error);
