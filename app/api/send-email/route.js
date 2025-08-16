@@ -7,8 +7,8 @@ export async function POST(request) {
     // Configurar el transportador de email (igual que en contact/route.js)
     const transporter = nodemailer.createTransport({
       host: 'mail.capres.com.ve',
-      port: 465,
-      secure: true,
+      port: 587,
+      secure: false,
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,

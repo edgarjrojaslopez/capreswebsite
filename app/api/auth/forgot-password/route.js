@@ -4,7 +4,7 @@ import { db } from '@/lib/db';
 import { socios, passwordResetTokens } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { randomBytes, createHash } from 'crypto';
-import { sendPasswordResetEmail } from '@/lib/mail';
+import { sendPasswordResetEmail } from '@/lib/mail.js.backup';
 
 export async function POST(request) {
   try {
