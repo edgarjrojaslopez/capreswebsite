@@ -12,7 +12,8 @@
         "**/*.js",
         "**/*.jsx",
         ".next/types/**/*.js",
-        "lib/mail.js"
+        "lib/mail.js",
+        "lib/mail.js.backup"
     ],
     "exclude": [
         "node_modules"
