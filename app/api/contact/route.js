@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import {
   sendContactFormToAdmin,
   sendContactConfirmationToUser,
-} from '@/lib/mail.js.backup';
+} from '@/lib/mail.js';
 
 export async function POST(req) {
   try {
