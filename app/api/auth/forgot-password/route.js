@@ -64,6 +64,22 @@ export async function POST(request) {
       expiresAt,
     });
 
+    // >>> INICIO: LOGS DE DIAGNÓSTICO PARA VERCEL
+    console.log('--- Iniciando diagnóstico de variables de entorno en Vercel ---');
+    const apiKey = process.env.RESEND_API_KEY;
+    const emailFrom = process.env.EMAIL_FROM;
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+
+    console.log(`EMAIL_FROM: ${emailFrom}`);
+    console.log(`NEXT_PUBLIC_BASE_URL: ${baseUrl}`);
+    if (apiKey) {
+      console.log(`RESEND_API_KEY: re_...${apiKey.slice(-4)}`);
+    } else {
+      console.log('RESEND_API_KEY: NO ESTÁ DEFINIDA');
+    }
+    console.log('-----------------------------------------------------------');
+    // >>> FIN: LOGS DE DIAGNÓSTICO
+
     // Enviar correo (manejar errores silenciosamente)
     try {
       await sendPasswordResetEmail({
@@ -75,7 +91,7 @@ export async function POST(request) {
       console.error('Error enviando correo:', emailError);
       // No revelar error al cliente
     }
-    //
+
     return NextResponse.json(successResponse);
   } catch (error) {
     console.error('Error en /api/auth/forgot-password:', error);
