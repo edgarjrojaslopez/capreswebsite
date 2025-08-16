@@ -12,7 +12,7 @@
         "**/*.js",
         "**/*.jsx",
         ".next/types/**/*.js",
-        "lib/mail.js.backup"
+        "lib/mail.js"
     ],
     "exclude": [
         "node_modules"

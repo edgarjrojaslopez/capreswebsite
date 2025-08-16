@@ -5,17 +5,23 @@ import { passwordResetTokens, socios } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import bcrypt from 'bcryptjs';
 import { createHash } from 'crypto';
+import { resetPasswordSchema } from '@/lib/validations/authSchema';
 
 export async function PUT(request) {
   try {
-    const { token, password } = await request.json();
+    const body = await request.json();
 
-    if (!token || !password) {
+    // Validar el cuerpo de la solicitud con Zod
+    const validation = resetPasswordSchema.safeParse(body);
+
+    if (!validation.success) {
       return NextResponse.json(
-        { error: 'Token y contraseña son requeridos' },
+        { error: validation.error.errors[0].message },
         { status: 400 }
       );
     }
+
+    const { token, password } = validation.data;
 
     // Hashear el token recibido
     const hashedToken = createHash('sha256').update(token).digest('hex');
@@ -29,37 +35,21 @@ export async function PUT(request) {
 
     if (!tokenRecord) {
       return NextResponse.json(
-        {
-          error: 'Token inválido',
-        },
+        { error: 'El enlace de recuperación es inválido o ha expirado' },
         { status: 400 }
       );
     }
 
     if (tokenRecord.used) {
       return NextResponse.json(
-        {
-          error: 'Token ya utilizado',
-        },
+        { error: 'Este enlace de recuperación ya ha sido utilizado' },
         { status: 400 }
       );
     }
 
     if (new Date() > new Date(tokenRecord.expiresAt)) {
       return NextResponse.json(
-        {
-          error: 'Token expirado',
-        },
-        { status: 400 }
-      );
-    }
-
-    // Validar fortaleza de contraseña
-    if (password.length < 8) {
-      return NextResponse.json(
-        {
-          error: 'La contraseña debe tener al menos 8 caracteres',
-        },
+        { error: 'El enlace de recuperación ha expirado' },
         { status: 400 }
       );
     }
@@ -67,13 +57,13 @@ export async function PUT(request) {
     // Hashear nueva contraseña
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    // Actualizar contraseña del socio
+    // Actualizar contraseña del socio y marcar token como usado (idealmente en una transacción)
+    // TODO: Envolver estas dos operaciones en una transacción
     await db
       .update(socios)
       .set({ password: hashedPassword })
       .where(eq(socios.CodSocio, tokenRecord.userId));
 
-    // Marcar token como usado
     await db
       .update(passwordResetTokens)
       .set({ used: true })
@@ -84,6 +74,13 @@ export async function PUT(request) {
         '¡Contraseña actualizada con éxito! Ahora puedes iniciar sesión con tu nueva contraseña.',
     });
   } catch (error) {
+    // Manejo de errores de Zod
+    if (error.name === 'ZodError') {
+      return NextResponse.json(
+        { error: error.errors[0].message },
+        { status: 400 }
+      );
+    }
     console.error('Error en reset-password:', error);
     return NextResponse.json(
       { error: 'Error interno del servidor' },
