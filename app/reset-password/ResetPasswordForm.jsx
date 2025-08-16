@@ -76,6 +76,25 @@ export default function ResetPasswordForm() {
     if (status.error) setStatus((prev) => ({ ...prev, error: '' }));
   };
 
+  const validatePassword = (password) => {
+    if (password.length < 8) {
+      return 'La contraseña debe tener al menos 8 caracteres';
+    }
+    if (!/[a-z]/.test(password)) {
+      return 'La contraseña debe contener al menos una letra minúscula';
+    }
+    if (!/[A-Z]/.test(password)) {
+      return 'La contraseña debe contener al menos una letra mayúscula';
+    }
+    if (!/[0-9]/.test(password)) {
+      return 'La contraseña debe contener al menos un número';
+    }
+    if (!/[^a-zA-Z0-9]/.test(password)) {
+      return 'La contraseña debe contener al menos un carácter especial';
+    }
+    return null;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -84,11 +103,9 @@ export default function ResetPasswordForm() {
       return;
     }
 
-    if (formData.password.length < 8) {
-      setStatus((prev) => ({
-        ...prev,
-        error: 'La contraseña debe tener al menos 8 caracteres',
-      }));
+    const passwordError = validatePassword(formData.password);
+    if (passwordError) {
+      setStatus((prev) => ({ ...prev, error: passwordError }));
       return;
     }
 
@@ -215,8 +232,18 @@ export default function ResetPasswordForm() {
               value={formData.password}
               onChange={handleChange}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Mínimo 8 caracteres"
+              placeholder="Introduce tu nueva contraseña"
             />
+            <div className="mt-2 text-xs text-gray-500">
+              <p className="font-semibold">La contraseña debe contener:</p>
+              <ul className="list-disc list-inside pl-2">
+                <li>Al menos 8 caracteres</li>
+                <li>Al menos una letra mayúscula (A-Z)</li>
+                <li>Al menos una letra minúscula (a-z)</li>
+                <li>Al menos un número (0-9)</li>
+                <li>Al menos un carácter especial (ej. !@#$%^&*)</li>
+              </ul>
+            </div>
           </div>
 
           <div>
