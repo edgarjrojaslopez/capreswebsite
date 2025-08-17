@@ -32,6 +32,15 @@ export default function DashboardContent({
   const [avatar, setAvatar] = useState('/avatar-default.png');
   const [changePasswordModal, setChangePasswordModal] = useState(false);
 
+  // Modal para retiro
+  const [showRetiroFormModal, setShowRetiroFormModal] = useState(false);
+  const [showRetiroModal, setShowRetiroModal] = useState(false);
+  const [selectedRetiroType, setSelectedRetiroType] = useState('');
+  const [retiroForm, setRetiroForm] = useState({
+    amount: '',
+    reason: '',
+  });
+
   console.log('🔍 DashboardContent - Token:', token ? 'Presente' : 'Ausente');
   console.log('🔍 DashboardContent - codSocio:', codSocio);
   console.log('🔍 DashboardContent - userData:', userData);
@@ -164,132 +173,21 @@ export default function DashboardContent({
       alert('Por favor completa todos los campos');
       return;
     }
-    const htmlTemplate = `
-    <!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Solicitud de Préstamo</title>
-</head>
-<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f9; color: #333; line-height: 1.6;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 700px; margin: 30px auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.1);">
-
-
-    <!-- CABECERA 100% COMPATIBLE -->
-    <tr>
-      <td bgcolor="#1e40af" style="background-color: #1e40af; padding: 30px 40px; text-align: center;">
-        <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
-          <tr>
-            <td style="text-align: center; color: white; font-family: Arial, sans-serif;">
-
-              <!-- Ícono como texto grande (seguro en todos los clientes) -->
-              <div style="font-size: 28px; line-height: 1; margin-bottom: 8px;">
-                📄
-              </div>
-
-              <!-- Título -->
-              <h1 style="font-size: 20px; font-weight: 600; margin: 0; color: white; font-family: Arial, sans-serif; padding: 0;">
-                Solicitud de Préstamo Recibida
-              </h1>
-
-              <!-- Subtítulo -->
-              <p style="font-size: 14px; margin: 8px 0 0; color: #e0e7ff; font-family: Arial, sans-serif; opacity: 0.95;">
-                Sistema de Gestión de Socios - CAPRES
-              </p>
-
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-
-    <!-- CUERPO -->
-    <tr>
-      <td style="padding: 40px;">
-
-        <!-- DATOS DEL SOLICITANTE -->
-        <div style="margin-bottom: 32px;">
-          <h2 style="font-size: 18px; color: #1e293b; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #e2e8f0; display: inline-block;">👤 Datos del Solicitante</h2>
-          <table width="100%" style="font-size: 14px; color: #1e293b;">
-            <tr>
-              <td width="30%" style="font-weight: 600; color: #475569; padding: 6px 0;">Nombre:</td>
-              <td style="padding: 6px 0;">${
-                userData.NombreCompleto || 'N/A'
-              }</td>
-            </tr>
-            <tr>
-              <td style="font-weight: 600; color: #475569; padding: 6px 0;">Cédula:</td>
-              <td style="padding: 6px 0;">${userData.CodSocio || 'N/A'}</td>
-            </tr>
-            <tr>
-              <td style="font-weight: 600; color: #475569; padding: 6px 0;">Email:</td>
-              <td style="padding: 6px 0;">${userData.Email || 'N/A'}</td>
-            </tr>
-            <tr>
-              <td style="font-weight: 600; color: #475569; padding: 6px 0;">Teléfono:</td>
-              <td style="padding: 6px 0;">${userData.Telefonos || 'N/A'}</td>
-            </tr>
-          </table>
-        </div>
-
-        <!-- DETALLES DEL PRÉSTAMO -->
-        <div style="margin-bottom: 32px;">
-          <h2 style="font-size: 18px; color: #1e293b; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #e2e8f0; display: inline-block;">💰 Detalles del Préstamo</h2>
-          <table width="100%" style="font-size: 14px; color: #1e293b;">
-            <tr>
-              <td width="30%" style="font-weight: 600; color: #475569; padding: 6px 0;">Tipo:</td>
-              <td style="padding: 6px 0;">${selectedLoanType.name}</td>
-            </tr>
-            <tr>
-              <td style="font-weight: 600; color: #475569; padding: 6px 0;">Monto Solicitado:</td>
-              <td style="padding: 6px 0;">Bs. ${Number(
-                loanForm.amount
-              ).toLocaleString('es-VE', { minimumFractionDigits: 2 })}</td>
-            </tr>
-            <tr>
-              <td style="font-weight: 600; color: #475569; padding: 6px 0;">Fecha de Solicitud:</td>
-              <td style="padding: 6px 0;">${new Date().toLocaleDateString(
-                'es-VE'
-              )}</td>
-            </tr>
-          </table>
-        </div>
-
-        <!-- RAZÓN DEL PRÉSTAMO -->
-        <div style="margin-bottom: 32px;">
-          <h2 style="font-size: 18px; color: #1e293b; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #e2e8f0; display: inline-block;">📝 Razón del Préstamo</h2>
-          <div style="background-color: #f8fafc; padding: 16px; border-radius: 8px; border-left: 4px solid #3b82f6; font-style: italic; color: #1e293b; line-height: 1.5;">
-            ${loanForm.reason.replace(/\n/g, '<br>')}
-          </div>
-        </div>
-
-        <!-- RESUMEN DESTACADO -->
-        <div style="background-color: #eff6ff; border: 1px solid #bfdbfe; padding: 16px; border-radius: 8px; text-align: center; margin: 24px 0;">
-          <strong style="color: #1e40af; font-size: 16px;">
-            Monto solicitado: Bs. ${Number(loanForm.amount).toLocaleString(
-              'es-VE',
-              { minimumFractionDigits: 2 }
-            )}
-          </strong>
-        </div>
-
-      </td>
-    </tr>
-
-    <!-- PIE DE PÁGINA -->
-    <tr>
-      <td style="text-align: center; padding: 20px; background-color: #f8fafc; color: #64748b; font-size: 12px; border-top: 1px solid #e2e8f0;">
-        Este mensaje fue generado automáticamente por el sistema de préstamos.<br>
-        &copy; ${new Date().getFullYear()} CAPRES. Todos los derechos reservados.
-      </td>
-    </tr>
-
-  </table>
-</body>
-</html>
-    `;
     try {
+      // const response = await fetch('/api/send-email', {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //     Authorization: `Bearer ${token}`,
+      //   },
+      //   body: JSON.stringify({
+      //     to: 'support@capreswebsite.capres.com.ve',
+      //     subject: `Solicitud de ${selectedLoanType.name} - ${
+      //       userData.NombreCompleto || userData.CodSocio
+      //     }`,
+      //     html: htmlTemplate,
+      //   }),
+      // });
       const response = await fetch('/api/send-email', {
         method: 'POST',
         headers: {
@@ -298,10 +196,10 @@ export default function DashboardContent({
         },
         body: JSON.stringify({
           to: 'support@capreswebsite.capres.com.ve',
-          subject: `Solicitud de ${selectedLoanType.name} - ${
-            userData.NombreCompleto || userData.CodSocio
-          }`,
-          html: htmlTemplate,
+          subject: `Solicitud de ${selectedLoanType.name} - ${userData.NombreCompleto}`,
+          userData, // ← Enviado completo
+          selectedLoanType,
+          loanForm,
         }),
       });
 
@@ -321,6 +219,70 @@ export default function DashboardContent({
       alert('Error al enviar la solicitud. Inténtalo nuevamente.');
     }
   };
+
+  const handleRetiroTypeSelect = (retiroType) => {
+    setSelectedRetiroType(retiroType);
+    setShowRetiroModal(false);
+    setShowRetiroFormModal(true);
+  };
+
+  const handleRetiroSubmit = async () => {
+    if (!retiroForm.reason.trim()) {
+      alert('Por favor indica la razón del retiro');
+      return;
+    }
+
+    let monto = 0;
+
+    if (selectedRetiroType.id === 'parcial') {
+      monto = parseFloat(retiroForm.amount);
+      if (isNaN(monto) || monto <= 0) {
+        alert('Ingresa un monto válido');
+        return;
+      }
+      if (monto > disponibleNeto) {
+        alert(`El monto no puede exceder Bs. ${formatNumber(disponibleNeto)}`);
+        return;
+      }
+    } else {
+      monto = disponibleNeto;
+    }
+
+    try {
+      const response = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          to: 'support@capreswebsite.capres.com.ve',
+          subject: `Solicitud de Retiro de Haberes - ${userData.NombreCompleto}`,
+          userData,
+          tipoSolicitud: 'retiro',
+          tipoRetiro: selectedRetiroType.id,
+          montoSolicitado: monto,
+          razon: retiroForm.reason,
+        }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        alert(
+          'Solicitud de retiro enviada correctamente. Será revisada en breve.'
+        );
+        setRetiroForm({ amount: '', reason: '' });
+        setShowRetiroFormModal(false);
+        setSelectedRetiroType('');
+      } else {
+        throw new Error(data.error || 'Error al enviar la solicitud');
+      }
+    } catch (error) {
+      console.error('Error al enviar la solicitud de retiro:', error);
+      alert('No se pudo enviar la solicitud. Inténtalo más tarde.');
+    }
+  };
+
   useEffect(() => {
     // Si el backend ya devuelve el avatar en userData, úsalo
     if (userData?.avatar) {
@@ -659,6 +621,57 @@ export default function DashboardContent({
             </div>
           )}
         </section>
+        {/* === RETIRO DE HABERES === */}
+        <section className="bg-white rounded-3xl shadow-lg p-7 border border-gray-100">
+          <h3 className="text-2xl font-semibold text-gray-800 mb-6 flex items-center gap-3">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 text-green-600"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M17 9l-7 7-7-7m14 0v7a2 2 0 01-2 2H5a2 2 0 01-2-2V9"
+              />
+            </svg>
+            Retiro de Haberes
+          </h3>
+
+          <div className="text-center py-12 text-gray-500 bg-gray-50 rounded-2xl">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-16 w-16 mx-auto mb-4 opacity-30"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={1.5}
+                d="M3 10h18M3 14h18m-9-4v8m-7-4h14a2 2 0 012 2v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4a2 2 0 012-2z"
+              />
+            </svg>
+            <h4 className="text-xl font-medium mb-4">
+              ¿Deseas retirar tus haberes?
+            </h4>
+            <p className="mb-6 max-w-md mx-auto">
+              Puedes solicitar un <strong>retiro parcial</strong> (hasta el 80%
+              de tus haberes) o un <strong>retiro total</strong> (baja del
+              sistema).
+            </p>
+            <button
+              onClick={() => setShowRetiroModal(true)}
+              className="px-8 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold rounded-xl hover:from-green-700 hover:to-green-800 transition-all duration-200 shadow-md hover:shadow-lg"
+            >
+              💵 Solicitar Retiro
+            </button>
+          </div>
+        </section>
         {/* === MODALES === */}
         {editing && (
           <EditModal
@@ -685,6 +698,29 @@ export default function DashboardContent({
               setSelectedLoanType('');
               setLoanForm({ amount: '', reason: '' });
             }}
+          />
+        )}
+        {showRetiroModal && (
+          <RetiroTypeModal
+            onClose={() => setShowRetiroModal(false)}
+            onSelectType={handleRetiroTypeSelect}
+            disponibleNeto={disponibleNeto}
+            formatNumber={formatNumber}
+          />
+        )}
+        {showRetiroFormModal && (
+          <RetiroFormModal
+            retiroType={selectedRetiroType}
+            form={retiroForm}
+            setForm={setRetiroForm}
+            onSubmit={handleRetiroSubmit}
+            onClose={() => {
+              setShowRetiroFormModal(false);
+              setSelectedRetiroType('');
+              setRetiroForm({ amount: '', reason: '' });
+            }}
+            disponibleNeto={disponibleNeto}
+            formatNumber={formatNumber}
           />
         )}
         {changePasswordModal && (
@@ -1034,6 +1070,160 @@ function LoanFormModal({ loanType, form, setForm, onSubmit, onClose }) {
           <button
             onClick={onSubmit}
             className="px-6 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition"
+          >
+            Enviar Solicitud
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RetiroTypeModal({
+  onClose,
+  onSelectType,
+  disponibleNeto,
+  formatNumber,
+}) {
+  const tipos = [
+    {
+      id: 'parcial',
+      name: 'Retiro Parcial',
+      description: 'Hasta el 80% de tus haberes totales',
+      icon: '💰',
+      maxAmount:
+        disponibleNeto === 0
+          ? 'No disponible'
+          : `Máx: Bs. ${formatNumber(disponibleNeto)}`,
+    },
+    {
+      id: 'total',
+      name: 'Retiro Total',
+      description: 'Saldo completo (baja del sistema)',
+      icon: '🏦',
+      maxAmount: disponibleNeto === 0 ? 'No disponible' : 'Total disponible',
+    },
+  ];
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full p-7">
+        <div className="flex justify-between items-center mb-6">
+          <h3 className="text-2xl font-bold text-gray-800">
+            💵 Tipo de Retiro
+          </h3>
+          <button
+            onClick={onClose}
+            className="text-gray-500 hover:text-gray-700 text-2xl"
+          >
+            ×
+          </button>
+        </div>
+        <div className="grid gap-4">
+          {tipos.map((tipo) => (
+            <button
+              key={tipo.id}
+              onClick={() => onSelectType(tipo)}
+              className="text-left p-4 border border-gray-200 rounded-xl hover:border-green-500 hover:bg-green-50 transition-all duration-200"
+            >
+              <div className="flex items-start gap-3">
+                <span className="text-2xl">{tipo.icon}</span>
+                <div>
+                  <h4 className="font-semibold text-gray-800">{tipo.name}</h4>
+                  <p className="text-sm text-gray-600 mt-1">
+                    {tipo.description}
+                  </p>
+                  <p className="text-sm font-medium text-green-600 mt-1">
+                    {tipo.maxAmount}
+                  </p>
+                </div>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RetiroFormModal({
+  retiroType,
+  form,
+  setForm,
+  onSubmit,
+  onClose,
+  disponibleNeto,
+  formatNumber,
+}) {
+  const isParcial = retiroType.id === 'parcial';
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-7">
+        <div className="flex justify-between items-center mb-6">
+          <h3 className="text-2xl font-bold text-gray-800">
+            {retiroType.icon} {retiroType.name}
+          </h3>
+          <button
+            onClick={onClose}
+            className="text-gray-500 hover:text-gray-700 text-2xl"
+          >
+            ×
+          </button>
+        </div>
+        <div className="space-y-5">
+          {isParcial && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Monto a Retirar (Bs.)
+              </label>
+              <input
+                type="number"
+                value={form.amount}
+                onChange={(e) => setForm({ ...form, amount: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                placeholder={
+                  disponibleNeto === 0
+                    ? 'No disponible'
+                    : `Hasta ${formatNumber(disponibleNeto)}`
+                }
+                min="0"
+                max={disponibleNeto}
+                step="0.01"
+              />
+            </div>
+          )}
+
+          {!isParcial && (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 text-sm text-yellow-800">
+              <strong>Retiro Total:</strong> Solicitarás el 100% de tu saldo
+              disponible.
+            </div>
+          )}
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Razón del Retiro
+            </label>
+            <textarea
+              value={form.reason}
+              onChange={(e) => setForm({ ...form, reason: e.target.value })}
+              rows={4}
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              placeholder="Indica el motivo del retiro"
+            />
+          </div>
+        </div>
+        <div className="flex justify-end gap-4 mt-8">
+          <button
+            onClick={onClose}
+            className="px-6 py-2.5 bg-gray-500 text-white rounded-xl hover:bg-gray-600 transition"
+          >
+            Cancelar
+          </button>
+          <button
+            onClick={onSubmit}
+            className="px-6 py-2.5 bg-green-600 text-white rounded-xl hover:bg-green-700 transition"
           >
             Enviar Solicitud
           </button>
