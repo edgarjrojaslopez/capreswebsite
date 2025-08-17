@@ -1,15 +1,16 @@
+// app/api/contact/route.js
+
 import { NextResponse } from 'next/server';
-import {
-  sendContactFormToAdmin,
-  sendContactConfirmationToUser,
-} from '@/lib/mail.js';
+import { Resend } from 'resend';
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req) {
   try {
     const body = await req.json();
     const { nombre, email, asunto, mensaje } = body;
 
-    // Validaciones básicas
+    // ✅ Validaciones
     if (!nombre || !email || !asunto || !mensaje) {
       return NextResponse.json(
         { error: 'Todos los campos son obligatorios' },
@@ -17,88 +18,73 @@ export async function POST(req) {
       );
     }
 
-    // Correo para  CAPRES
-    const mailToCapres = {
-      from: process.env.EMAIL_USER,
-      to: 'testmail@capres.com.ve',
-      subject: `Nuevo mensaje de contacto: ${asunto}`,
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return NextResponse.json(
+        { error: 'El correo electrónico no es válido' },
+        { status: 400 }
+      );
+    }
+
+    // ✅ Enviar correo a CAPRES
+    const { data: dataAdmin, error: errorAdmin } = await resend.emails.send({
+      from: 'Formulario de Contacto <support@capreswebsite.capres.com.ve>',
+      to: ['contactenos@capres.com.ve'], // Tu correo de contacto real
+      subject: `Nuevo mensaje: ${asunto}`,
       html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #1e40af; border-bottom: 2px solid #1e40af; padding-bottom: 10px;">
-            📧 Nuevo Mensaje de Contacto
-          </h2>
-
-          <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h3 style="color: #374151; margin-top: 0;">Información del Remitente:</h3>
-            <p><strong>Nombre:</strong> ${nombre}</p>
-            <p><strong>Correo:</strong> ${email}</p>
-            <p><strong>Asunto:</strong> ${asunto}</p>
-          </div>
-
-          <div style="background-color: #ffffff; padding: 20px; border: 1px solid #e5e7eb; border-radius: 8px;">
-            <h3 style="color: #374151; margin-top: 0;">Mensaje:</h3>
-            <p style="line-height: 1.6; color: #4b5563;">${mensaje}</p>
-          </div>
-
-          <div style="margin-top: 20px; padding: 15px; background-color: #dbeafe; border-radius: 8px;">
-            <p style="margin: 0; font-size: 14px; color: #1e40af;">
-              <strong>Nota:</strong> Responde directamente a ${email} para contactar al remitente.
-            </p>
+        <div style="font-family: Arial, sans-serif; max-width: 600px;">
+          <h2>📧 Nuevo mensaje de contacto</h2>
+          <p><strong>Nombre:</strong> ${nombre}</p>
+          <p><strong>Email:</strong> ${email}</p>
+          <p><strong>Asunto:</strong> ${asunto}</p>
+          <div style="background: #f8fafc; padding: 15px; border-radius: 8px;">
+            <p><strong>Mensaje:</strong></p>
+            <p>${mensaje}</p>
           </div>
         </div>
       `,
-    };
+    });
 
-    // Correo de confirmación para el usuario
-    const mailToUser = {
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: 'Confirmación - Mensaje recibido en CAPRES',
+    if (errorAdmin) {
+      console.error('❌ Error al enviar a CAPRES:', errorAdmin);
+      return NextResponse.json(
+        { error: 'No se pudo enviar el mensaje al administrador' },
+        { status: 500 }
+      );
+    }
+
+    // ✅ Enviar correo de confirmación al usuario
+    const { data: dataUser, error: errorUser } = await resend.emails.send({
+      from: 'CAPRES <contacto@capreswebsite.capres.com.ve>',
+      to: [email],
+      subject: '✅ Tu mensaje fue recibido',
       html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #1e40af; border-bottom: 2px solid #1e40af; padding-bottom: 10px;">
-            ✅ Mensaje Recibido - CAPRES
-          </h2>
-
+        <div style="font-family: Arial, sans-serif; max-width: 600px;">
+          <h2>✅ Hemos recibido tu mensaje</h2>
           <p>Hola <strong>${nombre}</strong>,</p>
-
-          <p>Hemos recibido tu mensaje con el asunto: <strong>"${asunto}"</strong></p>
-
-          <div style="background-color: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <p style="margin: 0; color: #0369a1;">
-              📞 <strong>¿Necesitas respuesta urgente?</strong><br>
-              Puedes contactarnos directamente al: <strong>+58 0212-7092111</strong>
-            </p>
-          </div>
-
-          <p>Nuestro equipo revisará tu consulta y te responderemos a la brevedad posible.</p>
-
-          <p style="color: #6b7280; font-size: 14px;">
-            <strong>Horario de atención:</strong><br>
-            Lunes a Viernes: 8:00 AM - 3:00 PM
-          </p>
-
-          <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
-
-          <p style="color: #9ca3af; font-size: 12px;">
-            Este es un correo automático, por favor no responder a esta dirección.
-          </p>
+          <p>Gracias por contactarnos. Hemos recibido tu consulta sobre: <strong>"${asunto}"</strong>.</p>
+          <p>Nos pondremos en contacto contigo pronto.</p>
+          <p><strong>Horario:</strong> Lunes a Viernes, 8:00 AM - 4:00 PM</p>
+          <hr style="border: 1px solid #e5e7eb; margin: 20px 0;">
+          <p style="color: #999; font-size: 12px;">Este es un mensaje automático. Por favor, no respondas a este correo.</p>
         </div>
       `,
-    };
+    });
 
-    // Enviar ambos correos
-    await Promise.all([
-      transporter.sendMail(mailToCapres),
-      transporter.sendMail(mailToUser),
-    ]);
+    // ⚠️ No es crítico si falla el correo al usuario
+    if (errorUser) {
+      console.warn(
+        'Advertencia: No se pudo enviar correo de confirmación al usuario:',
+        errorUser
+      );
+    }
 
     return NextResponse.json({
       success: true,
       message: 'Mensaje enviado exitosamente',
     });
   } catch (error) {
-    console.error('Error enviando correo:', error);
+    console.error('Error en /api/contact:', error);
     return NextResponse.json(
       { error: 'Error interno del servidor' },
       { status: 500 }
