@@ -95,14 +95,14 @@ export default function ContactPage() {
           `
         <div style="text-align: center; padding: 8px; min-width: 200px;">
           <h3 style="margin: 0 0 8px 0; color: #1e40af; font-weight: bold; font-size: 16px;">CAPRES</h3>
-          <p style="margin: 0 0 6px 0; font-size: 14px; font-weight: 500;">Caja de Ahorros SENIAT</p>
+          <p style="margin: 0 0 6px 0; font-size: 14px; font-weight: 500;">Caja de Ahorro SENIAT</p>
           <p style="margin: 0 0 6px 0; font-size: 12px; color: #666; line-height: 1.4;">
             Plaza Venezuela, Avenida Quito<br>
             Caracas 1052, Distrito Capital<br>
             Venezuela
           </p>
           <p style="margin: 0; font-size: 12px; color: #1e40af; font-weight: 500;">
-            📞 +58 0212-7092111
+            📞 +58 0212-7094764
           </p>
         </div>
       `
