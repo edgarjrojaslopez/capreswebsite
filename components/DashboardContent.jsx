@@ -164,6 +164,131 @@ export default function DashboardContent({
       alert('Por favor completa todos los campos');
       return;
     }
+    const htmlTemplate = `
+    <!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Solicitud de Préstamo</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f9; color: #333; line-height: 1.6;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 700px; margin: 30px auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.1);">
+
+
+    <!-- CABECERA 100% COMPATIBLE -->
+    <tr>
+      <td bgcolor="#1e40af" style="background-color: #1e40af; padding: 30px 40px; text-align: center;">
+        <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+          <tr>
+            <td style="text-align: center; color: white; font-family: Arial, sans-serif;">
+
+              <!-- Ícono como texto grande (seguro en todos los clientes) -->
+              <div style="font-size: 28px; line-height: 1; margin-bottom: 8px;">
+                📄
+              </div>
+
+              <!-- Título -->
+              <h1 style="font-size: 20px; font-weight: 600; margin: 0; color: white; font-family: Arial, sans-serif; padding: 0;">
+                Solicitud de Préstamo Recibida
+              </h1>
+
+              <!-- Subtítulo -->
+              <p style="font-size: 14px; margin: 8px 0 0; color: #e0e7ff; font-family: Arial, sans-serif; opacity: 0.95;">
+                Sistema de Gestión de Socios - CAPRES
+              </p>
+
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+
+    <!-- CUERPO -->
+    <tr>
+      <td style="padding: 40px;">
+
+        <!-- DATOS DEL SOLICITANTE -->
+        <div style="margin-bottom: 32px;">
+          <h2 style="font-size: 18px; color: #1e293b; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #e2e8f0; display: inline-block;">👤 Datos del Solicitante</h2>
+          <table width="100%" style="font-size: 14px; color: #1e293b;">
+            <tr>
+              <td width="30%" style="font-weight: 600; color: #475569; padding: 6px 0;">Nombre:</td>
+              <td style="padding: 6px 0;">${
+                userData.NombreCompleto || 'N/A'
+              }</td>
+            </tr>
+            <tr>
+              <td style="font-weight: 600; color: #475569; padding: 6px 0;">Cédula:</td>
+              <td style="padding: 6px 0;">${userData.CodSocio || 'N/A'}</td>
+            </tr>
+            <tr>
+              <td style="font-weight: 600; color: #475569; padding: 6px 0;">Email:</td>
+              <td style="padding: 6px 0;">${userData.Email || 'N/A'}</td>
+            </tr>
+            <tr>
+              <td style="font-weight: 600; color: #475569; padding: 6px 0;">Teléfono:</td>
+              <td style="padding: 6px 0;">${userData.Telefonos || 'N/A'}</td>
+            </tr>
+          </table>
+        </div>
+
+        <!-- DETALLES DEL PRÉSTAMO -->
+        <div style="margin-bottom: 32px;">
+          <h2 style="font-size: 18px; color: #1e293b; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #e2e8f0; display: inline-block;">💰 Detalles del Préstamo</h2>
+          <table width="100%" style="font-size: 14px; color: #1e293b;">
+            <tr>
+              <td width="30%" style="font-weight: 600; color: #475569; padding: 6px 0;">Tipo:</td>
+              <td style="padding: 6px 0;">${selectedLoanType.name}</td>
+            </tr>
+            <tr>
+              <td style="font-weight: 600; color: #475569; padding: 6px 0;">Monto Solicitado:</td>
+              <td style="padding: 6px 0;">Bs. ${Number(
+                loanForm.amount
+              ).toLocaleString('es-VE', { minimumFractionDigits: 2 })}</td>
+            </tr>
+            <tr>
+              <td style="font-weight: 600; color: #475569; padding: 6px 0;">Fecha de Solicitud:</td>
+              <td style="padding: 6px 0;">${new Date().toLocaleDateString(
+                'es-VE'
+              )}</td>
+            </tr>
+          </table>
+        </div>
+
+        <!-- RAZÓN DEL PRÉSTAMO -->
+        <div style="margin-bottom: 32px;">
+          <h2 style="font-size: 18px; color: #1e293b; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #e2e8f0; display: inline-block;">📝 Razón del Préstamo</h2>
+          <div style="background-color: #f8fafc; padding: 16px; border-radius: 8px; border-left: 4px solid #3b82f6; font-style: italic; color: #1e293b; line-height: 1.5;">
+            ${loanForm.reason.replace(/\n/g, '<br>')}
+          </div>
+        </div>
+
+        <!-- RESUMEN DESTACADO -->
+        <div style="background-color: #eff6ff; border: 1px solid #bfdbfe; padding: 16px; border-radius: 8px; text-align: center; margin: 24px 0;">
+          <strong style="color: #1e40af; font-size: 16px;">
+            Monto solicitado: Bs. ${Number(loanForm.amount).toLocaleString(
+              'es-VE',
+              { minimumFractionDigits: 2 }
+            )}
+          </strong>
+        </div>
+
+      </td>
+    </tr>
+
+    <!-- PIE DE PÁGINA -->
+    <tr>
+      <td style="text-align: center; padding: 20px; background-color: #f8fafc; color: #64748b; font-size: 12px; border-top: 1px solid #e2e8f0;">
+        Este mensaje fue generado automáticamente por el sistema de préstamos.<br>
+        &copy; ${new Date().getFullYear()} CAPRES. Todos los derechos reservados.
+      </td>
+    </tr>
+
+  </table>
+</body>
+</html>
+    `;
     try {
       const response = await fetch('/api/send-email', {
         method: 'POST',
@@ -172,31 +297,11 @@ export default function DashboardContent({
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          to: 'testmail@capres.com.ve',
+          to: 'support@capreswebsite.capres.com.ve',
           subject: `Solicitud de ${selectedLoanType.name} - ${
             userData.NombreCompleto || userData.CodSocio
           }`,
-          html: `
-            <h2>SOLICITUD DE PRÉSTAMO</h2>
-            <h3>Datos del Solicitante:</h3>
-            <ul>
-              <li><strong>Nombre:</strong> ${
-                userData.NombreCompleto || 'N/A'
-              }</li>
-              <li><strong>Cédula:</strong> ${userData.CodSocio || 'N/A'}</li>
-              <li><strong>Email:</strong> ${userData.Email || 'N/A'}</li>
-              <li><strong>Teléfono:</strong> ${userData.Telefonos || 'N/A'}</li>
-            </ul>
-            <h3>Detalles del Préstamo:</h3>
-            <ul>
-              <li><strong>Tipo:</strong> ${selectedLoanType.name}</li>
-              <li><strong>Monto Solicitado:</strong> Bs. ${Number(
-                loanForm.amount
-              ).toLocaleString()}</li>
-              <li><strong>Razón:</strong> ${loanForm.reason}</li>
-            </ul>
-            <p><strong>Fecha de Solicitud:</strong> ${new Date().toLocaleDateString()}</p>
-          `,
+          html: htmlTemplate,
         }),
       });
 
@@ -811,29 +916,29 @@ function LoanTypeModal({ onClose, onSelectType }) {
     {
       id: 'short',
       name: 'Préstamo a Corto Plazo',
-      description: 'Hasta 12 meses - 2% mensual',
-      maxAmount: 'Bs. 5.000.000',
+      description: 'Hasta 12 meses - 8% anual',
+      maxAmount: '80% de tus haberes',
       icon: '⚡',
     },
     {
       id: 'medium',
       name: 'Préstamo a Mediano Plazo',
-      description: 'Hasta 36 meses - 1.8% mensual',
-      maxAmount: 'Bs. 15.000.000',
+      description: 'Hasta 24 meses - 10% anual',
+      maxAmount: '80% de tus haberes',
       icon: '📈',
     },
     {
       id: 'long',
       name: 'Préstamo a Largo Plazo',
-      description: 'Hasta 60 meses - 1.5% mensual',
-      maxAmount: 'Bs. 30.000.000',
+      description: 'Hasta 36 meses - 12% mensual',
+      maxAmount: '80% de tus haberes',
       icon: '🏦',
     },
     {
       id: 'special',
       name: 'Préstamo Especial',
       description: 'Educativo, médico o familiar',
-      maxAmount: 'Hasta Bs. 20.000.000',
+      maxAmount: '80% de tus haberes',
       icon: '⭐',
     },
   ];
