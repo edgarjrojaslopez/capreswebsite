@@ -129,15 +129,14 @@ export default function DashboardContent({
     }
 
     const formData = new FormData();
-    formData.append('avatar', file); // ← El nombre debe coincidir con lo que espera busboy
+    formData.append('avatar', file);
 
     try {
       const res = await fetch(`/api/socios/${codSocio}/avatar`, {
         method: 'PUT',
         headers: {
           Authorization: `Bearer ${token}`,
-          // ❌ No pongas 'Content-Type': 'multipart/form-data'
-          // Next.js lo establece automáticamente con el boundary correcto
+          // NO pongas 'Content-Type'
         },
         body: formData,
       });
