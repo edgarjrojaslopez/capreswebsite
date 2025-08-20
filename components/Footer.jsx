@@ -15,7 +15,7 @@ export default function Footer() {
             <Link href="/" className="mb-4 inline-block">
               <Image
                 src="/assets/images/capres.jpg"
-                alt="Logo de la Caja de Ahorros"
+                alt="Logo de la Caja de Ahorro"
                 width={160}
                 height={50}
                 className="h-12 w-auto"

@@ -97,7 +97,7 @@ export default function Header() {
                 CAPRES
               </span>
               <span className="text-xs md:text-sm opacity-90 hidden sm:block">
-                Caja de Ahorros SENIAT
+                Caja de Ahorro SENIAT
               </span>
             </div>
           </Link>
