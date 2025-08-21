@@ -15,7 +15,7 @@ export async function middleware(request) {
     }
 
     try {
-      const secret = process.env.NEXT_PUBLIC_JWT_SECRET;
+      const secret = process.env.JWT_SECRET;
       if (!secret) throw new Error('JWT_SECRET no definido');
       const secretKey = new TextEncoder().encode(secret);
       const { payload } = await jwtVerify(token, secretKey);
