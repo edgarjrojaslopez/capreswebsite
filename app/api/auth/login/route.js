@@ -1,4 +1,3 @@
-// app/api/auth/login/route.js
 export const runtime = 'nodejs';
 
 import { db } from '@/lib/db';
@@ -19,7 +18,9 @@ export async function POST(req) {
 
     if (!cedula || !password) {
       return new Response(
-        JSON.stringify({ error: { message: 'Cédula y contraseña requeridas' } }),
+        JSON.stringify({
+          error: { message: 'Cédula y contraseña requeridas' },
+        }),
         { status: 400 }
       );
     }
@@ -57,18 +58,37 @@ export async function POST(req) {
     const token = await new SignJWT({
       cedula: user.CodSocio,
       nombre: user.NombreCompleto,
-      rol: user.rol, // <-- Incluir el rol en el token
+      rol: user.rol,
     })
       .setProtectedHeader({ alg: 'HS256' })
       .setExpirationTime('7d')
       .sign(secret);
 
+    // Establecer cookie httpOnly
+    const isProd = process.env.NODE_ENV === 'production';
+    const cookie = [
+      `token=${token}`,
+      'Path=/',
+      'HttpOnly',
+      'SameSite=Strict',
+      isProd ? 'Secure' : '', // Solo Secure en producción
+      'Max-Age=604800', // 7 días
+    ]
+      .filter(Boolean)
+      .join('; ');
+
     return new Response(
       JSON.stringify({
         token,
-        user: { id: user.CodSocio, nombre: user.NombreCompleto, rol: user.rol }, // <-- Devolver el rol en la respuesta
+        user: { id: user.CodSocio, nombre: user.NombreCompleto, rol: user.rol },
       }),
-      { status: 200 }
+      {
+        status: 200,
+        headers: {
+          'Set-Cookie': cookie,
+          'Content-Type': 'application/json',
+        },
+      }
     );
   } catch (error) {
     console.error('Error en login:', error);

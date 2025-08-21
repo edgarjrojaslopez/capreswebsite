@@ -27,6 +27,11 @@ export async function PUT(request, { params }) {
   }
 
   try {
+    console.log(
+      '🔍 avatar upload - content-type:',
+      request.headers.get('content-type')
+    );
+
     const formData = await request.formData();
     const file = formData.get('avatar');
 

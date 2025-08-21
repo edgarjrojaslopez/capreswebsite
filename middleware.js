@@ -15,13 +15,14 @@ export async function middleware(request) {
     }
 
     try {
-      const secret = new TextEncoder().encode(process.env.JWT_SECRET);
-      const { payload } = await jwtVerify(token, secret);
+      const secret = process.env.NEXT_PUBLIC_JWT_SECRET;
+      if (!secret) throw new Error('JWT_SECRET no definido');
+      const secretKey = new TextEncoder().encode(secret);
+      const { payload } = await jwtVerify(token, secretKey);
       console.log('✅ Token válido para usuario:', payload.cedula);
       return NextResponse.next();
     } catch (error) {
       console.log('❌ Invalid token, redirecting to login:', error.message);
-      // Limpiar cookie inválida
       const response = NextResponse.redirect(new URL('/login', request.url));
       response.cookies.delete('token');
       return response;

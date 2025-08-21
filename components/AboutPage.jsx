@@ -34,7 +34,7 @@ export default function AboutPage() {
         </h3>
         <div className="bg-white p-4 mb-6 rounded-lg shadow text-center">
           <img
-            src="avatar-default.png"
+            src="EloyNoriega.png"
             alt="Presidente Capres"
             className="w-24 h-24 mx-auto rounded-full mb-4"
           />
