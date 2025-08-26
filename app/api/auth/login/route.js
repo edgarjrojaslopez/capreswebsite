@@ -46,6 +46,12 @@ export async function POST(req) {
       );
     }
 
+    // Detecta si la contraseña es la predeterminada
+    let mustChangePassword = false;
+    if (await bcrypt.compare('password123', user.password)) {
+      mustChangePassword = true;
+    }
+
     if (!JWT_SECRET) {
       console.error('JWT_SECRET no está definido');
       return new Response(
@@ -59,6 +65,7 @@ export async function POST(req) {
       cedula: user.CodSocio,
       nombre: user.NombreCompleto,
       rol: user.rol,
+      mustChangePassword,
     })
       .setProtectedHeader({ alg: 'HS256' })
       .setExpirationTime('7d')
@@ -81,6 +88,7 @@ export async function POST(req) {
       JSON.stringify({
         token,
         user: { id: user.CodSocio, nombre: user.NombreCompleto, rol: user.rol },
+        mustChangePassword,
       }),
       {
         status: 200,

@@ -969,13 +969,6 @@ function LoanTypeModal({ onClose, onSelectType }) {
       maxAmount: '80% de tus haberes',
       icon: '🏦',
     },
-    {
-      id: 'special',
-      name: 'Préstamo Especial',
-      description: 'Educativo, médico o familiar',
-      maxAmount: '80% de tus haberes',
-      icon: '⭐',
-    },
   ];
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">

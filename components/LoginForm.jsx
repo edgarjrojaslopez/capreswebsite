@@ -40,6 +40,15 @@ export default function LoginForm() {
       localStorage.setItem('token', data.token);
       localStorage.setItem('userData', JSON.stringify(data.user));
 
+      // Si debe cambiar la contraseña, muestra mensaje y redirige
+      if (data.mustChangePassword) {
+        alert(
+          'Por su seguridad, debe cambiar su contraseña antes de continuar.'
+        );
+        router.push('/change-password');
+        return;
+      }
+
       // ✅ Usar router de Next.js en lugar de window.location
       router.push('/dashboard');
     } catch (err) {
