@@ -32,6 +32,7 @@
     "zod": "^3.22.2"
   },
   "devDependencies": {
+    "@toolwind/anchors": "^1.0.10",
     "autoprefixer": "^10.4.21",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.17"

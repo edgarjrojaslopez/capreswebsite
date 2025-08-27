@@ -22,7 +22,7 @@ export default function AboutPage() {
           nuestros socios.
         </p>
         <p>
-          Actualmente contamos con más de 4,500 socios activos y ofrecemos una
+          Actualmente contamos con más de 4.500 socios activos y ofrecemos una
           amplia gama de productos y servicios financieros diseñados
           específicamente para el colectivo SENIAT.
         </p>

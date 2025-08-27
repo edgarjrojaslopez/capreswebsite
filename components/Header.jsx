@@ -92,28 +92,42 @@ export default function Header() {
                 priority
               />
             </div>
-            <div className="flex flex-col">
-              <span className="text-xl md:text-2xl font-bold leading-tight">
-                CAPRES
-              </span>
-              <span className="text-xs md:text-sm opacity-90 hidden sm:block">
-                Caja de Ahorro SENIAT
-              </span>
-            </div>
           </Link>
         </div>
 
         {/* Menú Desktop (oculto en móvil) */}
-        <nav className="hidden md:flex space-x-6 items-center">
+        <nav className="hidden md:flex space-x-8  items-center">
           <Link href="/" className="hover:underline">
             Inicio
           </Link>
           <Link href="/about" className="hover:underline">
             Nosotros
           </Link>
-          <Link href="/loans" className="hover:underline">
-            Préstamos
-          </Link>
+          {/* Menú de Servicios */}
+          <div className="relative group">
+            <button
+              type="button"
+              className="hover:underline focus:outline-none py-2"
+            >
+              Servicios
+            </button>
+            <div className="absolute hidden group-hover:block pt-2 right-0 w-48 bg-transparent z-10">
+              <div className="bg-white text-gray-800 rounded shadow-lg">
+                <Link
+                  href="/loans"
+                  className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                >
+                  Préstamos
+                </Link>
+                <Link
+                  href="/retiros"
+                  className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                >
+                  Retiros
+                </Link>
+              </div>
+            </div>
+          </div>
           <Link href="/delegates" className="hover:underline">
             Delegados
           </Link>
@@ -129,7 +143,7 @@ export default function Header() {
             <div className="relative">
               <button
                 type="button"
-                className="px-3 py-2 rounded-md focus:outline-none"
+                className="px-3 py-2 mx-auto rounded-md focus:outline-none"
                 onClick={() => setShowMenu(!showMenu)}
               >
                 {user.nombre}
@@ -210,13 +224,28 @@ export default function Header() {
               >
                 Nosotros
               </Link>
-              <Link
-                href="/loans"
-                className="hover:underline"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Préstamos
-              </Link>
+
+              {/* Servicios en móvil */}
+              <div>
+                <span className="font-bold">Servicios</span>
+                <div className="flex flex-col space-y-4 pl-4 mt-2">
+                  <Link
+                    href="/loans"
+                    className="hover:underline"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Préstamos
+                  </Link>
+                  <Link
+                    href="/retiros"
+                    className="hover:underline"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Retiros
+                  </Link>
+                </div>
+              </div>
+
               <Link
                 href="/delegates"
                 className="hover:underline"

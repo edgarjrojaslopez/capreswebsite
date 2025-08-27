@@ -70,7 +70,6 @@ export default function LoanForm({ userId, username }) {
             <option value="short">Corto Plazo</option>
             <option value="medium">Mediano Plazo</option>
             <option value="long">Largo Plazo</option>
-            <option value="special">Especial</option>
           </select>
         </div>
 
