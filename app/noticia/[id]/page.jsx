@@ -9,12 +9,19 @@ import Image from 'next/image';
 const formatDate = (dateString) => {
   if (!dateString) return 'Fecha no disponible';
   const date = new Date(dateString);
+
+  // Si la fecha sigue siendo inválida por alguna razón, muestra un texto alternativo.
+  if (isNaN(date.getTime())) {
+    return 'Fecha inválida';
+  }
+
   return new Intl.DateTimeFormat('es-VE', {
     day: '2-digit',
     month: 'long',
     year: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
+    timeZone: 'America/Caracas', // Asegura la consistencia entre servidor y cliente
   }).format(date);
 };
 
