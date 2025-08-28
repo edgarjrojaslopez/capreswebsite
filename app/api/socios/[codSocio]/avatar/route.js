@@ -1,20 +1,18 @@
-export const runtime = 'nodejs';
 
-import { put } from '@vercel/blob';
+
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { socios } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
+import { writeFile } from 'fs/promises';
+import path from 'path';
 
-// Validación de autorización (puedes mejorarla con JWT si lo necesitas)
+// Validación de autorización
 async function checkAuth(request) {
   const token = request.headers.get('Authorization')?.split(' ')[1];
   if (!token) {
     return { authorized: false, error: 'No autorizado' };
   }
-
-  // Aquí podrías validar el token (ej: JWT, o comparar con uno secreto)
-  // Por ahora, solo verificamos que exista.
   // TODO: Implementa validación real si es necesario.
   return { authorized: true };
 }
@@ -29,11 +27,6 @@ export async function PUT(request, { params }) {
   }
 
   try {
-    console.log(
-      '🔍 avatar upload - content-type:',
-      request.headers.get('content-type')
-    );
-
     const formData = await request.formData();
     const file = formData.get('avatar');
 
@@ -51,20 +44,20 @@ export async function PUT(request, { params }) {
       );
     }
 
-    // Leer el archivo como ArrayBuffer
     const fileBuffer = Buffer.from(await file.arrayBuffer());
 
-    // Generar un nombre único
-    const ext = file.name.match(/\.[0-9a-z]+$/i)?.[0] || '.png';
+    // Generar un nombre de archivo único
+    const ext = path.extname(file.name) || '.png';
     const fileName = `avatar-${codSocio}-${Date.now()}${ext}`;
 
-    // Subir a Vercel Blob
-    const blob = await put(`avatars/${fileName}`, fileBuffer, {
-      access: 'public', // La URL será pública
-      contentType: file.type,
-    });
+    // Ruta de guardado en public/images
+    const savePath = path.join(process.cwd(), 'public', 'images', fileName);
 
-    const avatarUrl = blob.url; // URL pública del avatar
+    // Guardar el archivo
+    await writeFile(savePath, fileBuffer);
+
+    // URL pública para acceder al archivo
+    const avatarUrl = `/images/${fileName}`;
 
     // Actualizar en la base de datos
     const result = await db
@@ -73,6 +66,8 @@ export async function PUT(request, { params }) {
       .where(eq(socios.CodSocio, codSocio));
 
     if (result.rowsAffected === 0) {
+      // Si el socio no se encuentra, se podría borrar el archivo subido para no dejar basura
+      // await unlink(savePath); // (Opcional)
       return NextResponse.json(
         { error: 'Socio no encontrado.' },
         { status: 404 }
@@ -86,15 +81,6 @@ export async function PUT(request, { params }) {
     });
   } catch (error) {
     console.error('Error en /api/socios/[codSocio]/avatar:', error);
-
-    // Si el error es específico de Blob (ej: token faltante)
-    if (error.message.includes('BLOB_READ_WRITE_TOKEN')) {
-      return NextResponse.json(
-        { error: 'Configuración de almacenamiento no válida.' },
-        { status: 500 }
-      );
-    }
-
     return NextResponse.json(
       { error: 'Error interno del servidor', details: error.message },
       { status: 500 }
