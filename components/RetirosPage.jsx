@@ -44,7 +44,7 @@ export default function RetirosPageContent() {
               </li>
             </ul>
           </div>
-          <div className="bg-white p-6 rounded-lg shadow ">
+          <div className="bg-white p-6 rounded-lg shadow mb-6">
             <li className="mb-2 font-semibold ml-4">
               Plazo para la liquidación
             </li>
@@ -68,71 +68,82 @@ export default function RetirosPageContent() {
               </li>
             </ul>
           </div>
-
-          <li className="mb-2 font-semibold">Plazo para Retirar los Fondos</li>
-          <p className="mb-2">
-            Una vez liquidado el monto, los exasociados tienen un tiempo
-            limitado para reclamar sus haberes:
-          </p>
-          <ul className="list-disc ml-4">
-            <li>
-              Deben retirar sus fondos dentro de los{' '}
-              <strong>3 años siguientes</strong> a la fecha de retiro.
+          <div className="bg-white p-6 rounded-lg shadow mb-6">
+            <li className="mb-2 font-semibold ml-4">
+              Plazo para Retirar los Fondos
             </li>
-            <li className="mb-2">
-              Si no se realiza el retiro en este período, los haberes{' '}
-              <strong>
-                se considerarán ingresos extraordinarios de CAPRES
-              </strong>
-              , y el interesado{' '}
-              <strong>pierde definitivamente el derecho</strong> a reclamarlos.
+            <p className="mb-2">
+              Una vez liquidado el monto, los exasociados tienen un tiempo
+              limitado para reclamar sus haberes:
+            </p>
+            <ul className="list-disc ml-4">
+              <li>
+                Deben retirar sus fondos dentro de los{' '}
+                <strong>3 años siguientes</strong> a la fecha de retiro.
+              </li>
+              <li className="mb-2">
+                Si no se realiza el retiro en este período, los haberes{' '}
+                <strong>
+                  se considerarán ingresos extraordinarios de CAPRES
+                </strong>
+                , y el interesado{' '}
+                <strong>pierde definitivamente el derecho</strong> a
+                reclamarlos.
+              </li>
+            </ul>
+          </div>
+          <div className="bg-white p-6 rounded-lg shadow mb-6">
+            <li className="mb-2 font-semibold ml-4">
+              Retiro Parcial de Haberes
             </li>
-          </ul>
-          <li className="mb-2 font-semibold">Retiro Parcial de Haberes</li>
-          <p>
-            Los asociados pueden acceder a un retiro parcial de sus ahorros bajo
-            ciertas condiciones:
-          </p>
-          <ul className="list-disc ml-4">
-            <li>
-              <strong>Un solo retiro parcial al año</strong>, por un monto
-              máximo del <strong> 80% de los haberes disponibles</strong>.
-            </li>
-            <li>
-              Debe transcurrir un mínimo de <strong>12 meses</strong> entre un
-              retiro y el siguiente.
-            </li>
-            <li className="mb-2">
-              El asociado <strong>no debe tener deudas pendientes</strong> con
-              CAPRES al momento de solicitarlo.
-            </li>
-          </ul>
-          <p className="mb-2">
-            <strong>Causales permitidas para el retiro parcial</strong>:
-          </p>
-          <ul className="list-disc ml-4">
-            <li>
-              Cancelación de gravamen sobre la{' '}
-              <strong>vivienda principal</strong>.
-            </li>
-            <li>
-              <strong>Reparación o ampliación</strong> de la vivienda principal.
-            </li>
-            <li>
-              <strong>Gastos médicos u odontológicos</strong> no cubiertos por
-              el seguro del SENIAT, aplicables al asociado, cónyuge,
-              concubino(a), padres o hijos dependientes.
-            </li>
-            <li>
-              <strong>Gastos educativos</strong> del asociado, su pareja o sus
-              descendientes.
-            </li>
-            <li>
-              Cualquier otra circunstancia{' '}
-              <strong>debidamente comprobada y aceptada</strong> por el Consejo
-              de Administración
-            </li>
-          </ul>
+            <p>
+              Los asociados pueden acceder a un retiro parcial de sus ahorros
+              bajo ciertas condiciones:
+            </p>
+            <ul className="list-disc ml-4">
+              <li>
+                <strong>Un solo retiro parcial al año</strong>, por un monto
+                máximo del <strong> 80% de los haberes disponibles</strong>.
+              </li>
+              <li>
+                Debe transcurrir un mínimo de <strong>12 meses</strong> entre un
+                retiro y el siguiente.
+              </li>
+              <li className="mb-2">
+                El asociado <strong>no debe tener deudas pendientes</strong> con
+                CAPRES al momento de solicitarlo.
+              </li>
+            </ul>
+          </div>
+          <div className="bg-white p-6 rounded-lg shadow mb-6">
+            <p className="mb-2">
+              <strong>Causales permitidas para el retiro parcial</strong>:
+            </p>
+            <ul className="list-disc ml-4">
+              <li>
+                Cancelación de gravamen sobre la{' '}
+                <strong>vivienda principal</strong>.
+              </li>
+              <li>
+                <strong>Reparación o ampliación</strong> de la vivienda
+                principal.
+              </li>
+              <li>
+                <strong>Gastos médicos u odontológicos</strong> no cubiertos por
+                el seguro del SENIAT, aplicables al asociado, cónyuge,
+                concubino(a), padres o hijos dependientes.
+              </li>
+              <li>
+                <strong>Gastos educativos</strong> del asociado, su pareja o sus
+                descendientes.
+              </li>
+              <li>
+                Cualquier otra circunstancia{' '}
+                <strong>debidamente comprobada y aceptada</strong> por el
+                Consejo de Administración
+              </li>
+            </ul>
+          </div>
         </ol>
       </section>
     </div>
