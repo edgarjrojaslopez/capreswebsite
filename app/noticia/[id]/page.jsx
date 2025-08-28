@@ -66,7 +66,7 @@ export default async function NoticiaPage({ params }) {
               src={noticia.imagenUrl}
               alt={`Imagen para ${noticia.titulo}`}
               layout="fill"
-              objectFit="cover"
+              objectfit="cover"
               className="w-full h-64 object-cover rounded-2xl mb-6"
             />
           </div>
