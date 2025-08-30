@@ -16,3 +16,8 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+body {
+  background-image: url('/assets/images/squares.png');
+  background-repeat: repeat;
+}
