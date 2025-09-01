@@ -102,7 +102,7 @@ export default function ContactPage() {
             Venezuela
           </p>
           <p style="margin: 0; font-size: 12px; color: #1e40af; font-weight: 500;">
-            📞 +58 0212-7094764
+            📞 +58 0212-7094761
           </p>
         </div>
       `
@@ -169,10 +169,10 @@ export default function ContactPage() {
               </svg>
               <div>
                 <h4 className="font-semibold">Teléfono</h4>
-                <p>+58 0212-7094764</p>
+                <p>+58 0212-7094761</p>
                 <p>+58 0212-7094758</p>
                 <p>+58 0212-7094746</p>
-                <p>+58 0212-7094751</p>
+                <p>+58 0212-7094764</p>
               </div>
             </div>
 
@@ -192,7 +192,7 @@ export default function ContactPage() {
               </svg>
               <div>
                 <h4 className="font-semibold">Correo Electrónico</h4>
-                <p>contactanos@capres.com.ve</p>
+                <p>contactenos@capres.com.ve</p>
               </div>
             </div>
           </div>

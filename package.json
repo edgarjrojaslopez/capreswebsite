@@ -32,12 +32,12 @@
     "sharp": "^0.34.3",
     "styled-components": "^6.1.19",
     "xlsx": "^0.18.5",
-    "zod": "^3.22.2"
+    "zod": "^3.22.2",
+    "cross-env": "^10.0.0"
   },
   "devDependencies": {
     "@toolwind/anchors": "^1.0.10",
     "autoprefixer": "^10.4.21",
-    "cross-env": "^10.0.0",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.17"
   }
