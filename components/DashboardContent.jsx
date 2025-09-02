@@ -475,10 +475,10 @@ export default function DashboardContent({
               label="Fecha de Ingreso"
               value={formatDate(userData.FechaIng)}
             />
-            <DetailItem
+            {/* <DetailItem
               label="Cuenta Bancaria"
               value={userData.NroCtaBanco || 'No registrada'}
-            />
+            /> */}
             <DetailItem
               label="Teléfono"
               value={userData.Telefonos || 'No registrado'}
