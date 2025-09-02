@@ -1,12 +1,21 @@
 // app/api/send-email/route.js
 
-import { Resend } from 'resend';
+import nodemailer from 'nodemailer';
 import { generateTrackingId } from '@/lib/generateTrackingId';
 
 import { db } from '@/lib/db';
 import { solicitudes, solicitudes_haberes } from '@/lib/db/schema';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const transporter = nodemailer.createTransport({
+  host: process.env.EMAIL_HOST,
+  port: process.env.EMAIL_PORT,
+  secure: process.env.EMAIL_PORT == 465, // true for 465, false for other ports
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
+
 const DEFAULT_FROM = process.env.EMAIL_USER;
 
 export async function POST(request) {
@@ -111,7 +120,7 @@ export async function POST(request) {
 
                 <h2 style="color:#1e293b; font-size:18px; border-bottom:2px solid #e2e8f0; display:inline-block; margin:24px 0 16px;">💰 Detalles del Retiro</h2>
                 <table width="100%" style="font-size:14px; color:#1e293b;">
-                  <tr><td width="30%"><strong>Tipo:</strong></td><td>Retiro ${
+                  <tr><td width="30%"><strong>Tipo:</strong></td><td>Retiro ${ 
                     tipoRetiro === 'parcial' ? 'Parcial' : 'Total'
                   }</td></tr>
                   <tr><td><strong>Monto:</strong></td><td>Bs. ${new Intl.NumberFormat(
@@ -251,18 +260,17 @@ export async function POST(request) {
       `;
     }
 
-    // === ENVIAR CORREO CON RESEND ===
-    const { data, error } = await resend.emails.send({
+    // === ENVIAR CORREO CON NODEMAILER ===
+    const mailOptions = {
       from: DEFAULT_FROM,
       to: Array.isArray(to) ? to : [to],
       subject: `${subject} [${numeroSeguimiento}]`,
       html,
-    });
+    };
 
-    if (error) {
-      console.error('❌ Error al enviar correo:', error);
-      return Response.json({ error: error.message }, { status: 500 });
-    }
+    const info = await transporter.sendMail(mailOptions);
+
+    console.log('✅ Correo enviado con Nodemailer:', info);
 
     // === RESPUESTA EXITOSA ===
     return Response.json({
@@ -270,7 +278,7 @@ export async function POST(request) {
       message: 'Solicitud procesada y correo enviado',
       data: {
         numeroSeguimiento,
-        email: data,
+        email: info,
       },
     });
   } catch (err) {
