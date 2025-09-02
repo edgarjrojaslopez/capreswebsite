@@ -194,7 +194,7 @@ export default function DashboardContent({
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          to: 'support@capreswebsite.capres.com.ve',
+          to: process.env.NEXT_PUBLIC_EMAIL_TO,
           subject: `Solicitud de ${selectedLoanType.name} - ${userData.NombreCompleto}`,
           userData, // ← Enviado completo
           selectedLoanType,
@@ -255,7 +255,7 @@ export default function DashboardContent({
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          to: 'support@capreswebsite.capres.com.ve',
+          to: process.env.NEXT_PUBLIC_EMAIL_TO,
           subject: `Solicitud de Retiro de Haberes - ${userData.NombreCompleto}`,
           userData,
           tipoSolicitud: 'retiro',
@@ -697,6 +697,8 @@ export default function DashboardContent({
               setSelectedLoanType('');
               setLoanForm({ amount: '', reason: '' });
             }}
+            maxAmount={disponibleNeto} // ← Aquí pasas el monto máximo
+            formatNumber={formatNumber} // ✅ Añade esta línea
           />
         )}
         {showRetiroModal && (
@@ -1018,7 +1020,75 @@ function LoanTypeModal({ onClose, onSelectType }) {
   );
 }
 
-function LoanFormModal({ loanType, form, setForm, onSubmit, onClose }) {
+// function LoanFormModal({ loanType, form, setForm, onSubmit, onClose }) {
+//   return (
+//     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+//       <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-7">
+//         <div className="flex justify-between items-center mb-6">
+//           <h3 className="text-2xl font-bold text-gray-800">
+//             {loanType.icon} {loanType.name}
+//           </h3>
+//           <button
+//             onClick={onClose}
+//             className="text-gray-500 hover:text-gray-700 text-2xl"
+//           >
+//             ×
+//           </button>
+//         </div>
+//         <div className="space-y-5">
+//           <div>
+//             <label className="block text-sm font-medium text-gray-700 mb-2">
+//               Monto Solicitado (Bs.)
+//             </label>
+//             <input
+//               type="number"
+//               value={form.amount}
+//               onChange={(e) => setForm({ ...form, amount: e.target.value })}
+//               className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+//               placeholder="Ingresa el monto"
+//             />
+//           </div>
+//           <div>
+//             <label className="block text-sm font-medium text-gray-700 mb-2">
+//               Razón del Préstamo
+//             </label>
+//             <textarea
+//               value={form.reason}
+//               onChange={(e) => setForm({ ...form, reason: e.target.value })}
+//               rows={4}
+//               className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+//               placeholder="Describe el motivo del préstamo"
+//             />
+//           </div>
+//         </div>
+//         <div className="flex justify-end gap-4 mt-8">
+//           <button
+//             onClick={onClose}
+//             className="px-6 py-2.5 bg-gray-500 text-white rounded-xl hover:bg-gray-600 transition"
+//           >
+//             Cancelar
+//           </button>
+//           <button
+//             onClick={onSubmit}
+//             className="px-6 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition"
+//           >
+//             Enviar Solicitud
+//           </button>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
+
+function LoanFormModal({
+  loanType,
+  form,
+  setForm,
+  onSubmit,
+  onClose,
+  maxAmount,
+  formatNumber, // ✅ Añade esta línea
+}) {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-7">
@@ -1033,6 +1103,7 @@ function LoanFormModal({ loanType, form, setForm, onSubmit, onClose }) {
             ×
           </button>
         </div>
+
         <div className="space-y-5">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -1041,11 +1112,30 @@ function LoanFormModal({ loanType, form, setForm, onSubmit, onClose }) {
             <input
               type="number"
               value={form.amount}
-              onChange={(e) => setForm({ ...form, amount: e.target.value })}
+              onChange={(e) => {
+                const value = e.target.value;
+                // Evitar valores negativos o mayores al máximo
+                if (
+                  value === '' ||
+                  (parseFloat(value) <= maxAmount && parseFloat(value) >= 0)
+                ) {
+                  setForm({ ...form, amount: value });
+                }
+              }}
               className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Ingresa el monto"
+              placeholder={
+                maxAmount === 0
+                  ? 'No disponible'
+                  : `Hasta ${formatNumber(maxAmount)}`
+              }
+              min="0"
+              max={maxAmount}
+              step="0.01"
+              // Opcional: desactivar si no hay monto disponible
+              disabled={maxAmount === 0}
             />
           </div>
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Razón del Préstamo
@@ -1059,6 +1149,7 @@ function LoanFormModal({ loanType, form, setForm, onSubmit, onClose }) {
             />
           </div>
         </div>
+
         <div className="flex justify-end gap-4 mt-8">
           <button
             onClick={onClose}
@@ -1068,7 +1159,12 @@ function LoanFormModal({ loanType, form, setForm, onSubmit, onClose }) {
           </button>
           <button
             onClick={onSubmit}
-            className="px-6 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition"
+            disabled={
+              !form.amount ||
+              parseFloat(form.amount) > maxAmount ||
+              maxAmount === 0
+            }
+            className="px-6 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
           >
             Enviar Solicitud
           </button>
