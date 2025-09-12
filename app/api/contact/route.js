@@ -1,9 +1,19 @@
+
+
 // app/api/contact/route.js
-
 import { NextResponse } from 'next/server';
-import { Resend } from 'resend';
+import nodemailer from 'nodemailer';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Verificar que todas las variables de entorno estén definidas
+if (
+  !process.env.EMAIL_HOST ||
+  !process.env.EMAIL_PORT ||
+  !process.env.EMAIL_USER ||
+  !process.env.EMAIL_PASS ||
+  !process.env.NEXT_PUBLIC_EMAIL_TO
+) {
+  console.error('❌ Faltan variables de entorno para el correo');
+}
 
 export async function POST(req) {
   try {
@@ -26,10 +36,25 @@ export async function POST(req) {
       );
     }
 
-    // ✅ Enviar correo a CAPRES
-    const { data: dataAdmin, error: errorAdmin } = await resend.emails.send({
-      from: 'Formulario de Contacto <support@capreswebsite.capres.com.ve>',
-      to: ['contactenos@capres.com.ve'], // Tu correo de contacto real
+    // ✅ Configuración del transporte con Nodemailer
+    const transporter = nodemailer.createTransport({
+      host: process.env.EMAIL_HOST,
+      port: parseInt(process.env.EMAIL_PORT, 10),
+      secure: true, // true para puerto 465 (requiere SSL)
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+      // Opcional: para servidores internos o con certificados personalizados
+      tls: {
+        rejectUnauthorized: false, // ⚠️ Solo si tienes problemas de certificado
+      },
+    });
+
+    // ✅ 1. Enviar al administrador (CAPRES)
+    await transporter.sendMail({
+      from: `"Formulario de Contacto" <${process.env.EMAIL_USER}>`,
+      to: process.env.NEXT_PUBLIC_EMAIL_TO,
       subject: `Nuevo mensaje: ${asunto}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px;">
@@ -45,18 +70,10 @@ export async function POST(req) {
       `,
     });
 
-    if (errorAdmin) {
-      console.error('❌ Error al enviar a CAPRES:', errorAdmin);
-      return NextResponse.json(
-        { error: 'No se pudo enviar el mensaje al administrador' },
-        { status: 500 }
-      );
-    }
-
-    // ✅ Enviar correo de confirmación al usuario
-    const { data: dataUser, error: errorUser } = await resend.emails.send({
-      from: 'CAPRES <contacto@capreswebsite.capres.com.ve>',
-      to: [email],
+    // ✅ 2. Enviar correo de confirmación al usuario
+    await transporter.sendMail({
+      from: `"CAPRES" <${process.env.EMAIL_USER}>`,
+      to: email,
       subject: '✅ Tu mensaje fue recibido',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px;">
@@ -71,22 +88,35 @@ export async function POST(req) {
       `,
     });
 
-    // ⚠️ No es crítico si falla el correo al usuario
-    if (errorUser) {
-      console.warn(
-        'Advertencia: No se pudo enviar correo de confirmación al usuario:',
-        errorUser
-      );
-    }
-
     return NextResponse.json({
       success: true,
       message: 'Mensaje enviado exitosamente',
     });
   } catch (error) {
-    console.error('Error en /api/contact:', error);
+    console.error('❌ Error en /api/contact:', error);
+
+    // Mejorar el mensaje de error según el tipo
+    if (error.code === 'ECONNECTION') {
+      return NextResponse.json(
+        {
+          error:
+            'No se pudo conectar al servidor de correo. Revisa la configuración SMTP.',
+        },
+        { status: 500 }
+      );
+    }
+    if (error.responseCode === 535) {
+      return NextResponse.json(
+        {
+          error:
+            'Error de autenticación SMTP. Usuario o contraseña incorrectos.',
+        },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json(
-      { error: 'Error interno del servidor' },
+      { error: 'No se pudo enviar el mensaje. Inténtalo más tarde.' },
       { status: 500 }
     );
   }

@@ -1,5 +1,5 @@
 // app/forgot-password/page.js
-import { Suspense } from 'react';
+// import { Suspense } from 'react';
 import ForgotPasswordForm from './ForgotPasswordForm';
 
 export default function ForgotPasswordPage() {

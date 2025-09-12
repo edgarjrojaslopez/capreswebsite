@@ -3,22 +3,13 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
-// Función para obtener token de cookie o localStorage
-const getToken = () => {
-  if (typeof window === 'undefined') return null;
-  const cookieToken = document.cookie
-    .split('; ')
-    .find((row) => row.startsWith('token='))
-    ?.split('=')[1];
-  return cookieToken || localStorage.getItem('token');
-};
+const token = '';
 
 export default function DashboardContent({
   userData,
   haberesData,
   prestamosData,
   codSocio,
-  token,
 }) {
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({});
@@ -41,7 +32,7 @@ export default function DashboardContent({
     reason: '',
   });
 
-  console.log('🔍 DashboardContent - Token:', token ? 'Presente' : 'Ausente');
+  
   console.log('🔍 DashboardContent - codSocio:', codSocio);
   console.log('🔍 DashboardContent - userData:', userData);
   // console.log('🔍 Headers:', Object.fromEntries(request.headers.entries()));
@@ -103,7 +94,6 @@ export default function DashboardContent({
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(allowedFields),
       });
@@ -135,7 +125,6 @@ export default function DashboardContent({
       const res = await fetch(`/api/socios/${codSocio}/avatar`, {
         method: 'PUT',
         headers: {
-          Authorization: `Bearer ${token}`,
           // NO pongas 'Content-Type'
         },
         body: formData,
@@ -191,7 +180,6 @@ export default function DashboardContent({
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           to: process.env.NEXT_PUBLIC_EMAIL_TO,
@@ -252,7 +240,6 @@ export default function DashboardContent({
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           to: process.env.NEXT_PUBLIC_EMAIL_TO,
@@ -862,12 +849,10 @@ function ChangePasswordModal({ onClose, onSuccess }) {
       return;
     }
     try {
-      const token = getToken();
       const res = await fetch('/api/auth/change-password', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           currentPassword: current,

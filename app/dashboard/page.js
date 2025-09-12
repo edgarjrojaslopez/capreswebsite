@@ -5,68 +5,39 @@ import { useRouter } from 'next/navigation';
 import DashboardContent from '@/components/DashboardContent';
 
 export default function DashboardPage() {
-  const [userData, setUserData] = useState(null);
-  const [haberesData, setHaberesData] = useState(null);
-  const [prestamosData, setPrestamosData] = useState([]);
+  const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [token, setToken] = useState(null);
-  const [codSocio, setCodSocio] = useState(null);
+  const [error, setError] = useState('');
   const router = useRouter();
 
   useEffect(() => {
-    // Obtener token y datos del usuario
-    const storedToken = localStorage.getItem('token');
-    const storedUserData = localStorage.getItem('userData');
+    const fetchDashboardData = async () => {
+      try {
+        // Llama al nuevo endpoint seguro. El navegador adjuntará la cookie HttpOnly automáticamente.
+        const response = await fetch('/api/dashboard/me');
 
-    if (!storedToken || !storedUserData) {
-      router.push('/login');
-      return;
-    }
+        if (response.status === 401) {
+          // Si la sesión no es válida (401 Unauthorized), redirige al login.
+          router.push('/login');
+          return;
+        }
 
-    try {
-      const parsedUserData = JSON.parse(storedUserData);
-      const userCodSocio = parsedUserData.id || parsedUserData.CodSocio;
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
 
-      console.log(
-        '🔍 Dashboard - Token:',
-        storedToken ? 'Presente' : 'Ausente'
-      );
-      console.log('🔍 Dashboard - CodSocio extraído:', userCodSocio);
-
-      setToken(storedToken);
-      setCodSocio(userCodSocio);
-
-      // Cargar datos del dashboard
-      fetchDashboardData(userCodSocio, storedToken);
-    } catch (error) {
-      console.error('Error parsing user data:', error);
-      router.push('/login');
-    }
-  }, [router]);
-
-  const fetchDashboardData = async (codSocio, token) => {
-    try {
-      const response = await fetch(`/api/dashboard/${codSocio}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const data = await response.json();
+        setDashboardData(data);
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+        setError('No se pudieron cargar los datos del dashboard. Intenta recargar la página.');
+      } finally {
+        setLoading(false);
       }
+    };
 
-      const data = await response.json();
-
-      setUserData(data.socio);
-      setHaberesData(data.haberes);
-      setPrestamosData(data.prestamos || []);
-    } catch (error) {
-      console.error('Error fetching dashboard data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    fetchDashboardData();
+  }, [router]);
 
   if (loading) {
     return (
@@ -76,11 +47,19 @@ export default function DashboardPage() {
     );
   }
 
-  if (!userData || !codSocio) {
+  if (error) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="text-lg text-red-600">{error}</div>
+      </div>
+    );
+  }
+  
+  if (!dashboardData) {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="text-lg text-red-600">
-          Error: No se pudieron cargar los datos del usuario
+          Error: No se pudieron cargar los datos del usuario.
         </div>
       </div>
     );
@@ -90,11 +69,10 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-gray-100">
       <main className="container mx-auto px-4 py-8">
         <DashboardContent
-          userData={userData}
-          haberesData={haberesData}
-          prestamosData={prestamosData}
-          codSocio={codSocio}
-          token={token}
+          userData={dashboardData.socio}
+          haberesData={dashboardData.haberes}
+          prestamosData={dashboardData.prestamos || []}
+          codSocio={dashboardData.socio.CodSocio}
         />
       </main>
     </div>

@@ -13,10 +13,8 @@ if (!JWT_SECRET) {
 }
 
 export async function POST(req) {
-  console.log('--- INICIO PETICIÓN DE LOGIN ---');
   try {
     const { cedula, password } = await req.json();
-    console.log('1. Datos recibidos:', { cedula, password: '****' });
 
     if (!cedula || !password) {
       return new Response(
@@ -33,20 +31,15 @@ export async function POST(req) {
       .where(eq(socios.CodSocio, cedula));
 
     if (!user) {
-      console.log('2. Usuario no encontrado en la base de datos.');
       return new Response(
         JSON.stringify({ error: { message: 'Credenciales inválidas' } }),
         { status: 401 }
       );
     }
 
-    console.log('2. Usuario encontrado:', { id: user.CodSocio, nombre: user.NombreCompleto });
-
     const isValid = await bcrypt.compare(password, user.password);
-    console.log('3. Resultado de validación de contraseña:', isValid);
 
     if (!isValid) {
-      console.log('-> Contraseña inválida.');
       return new Response(
         JSON.stringify({ error: { message: 'Credenciales inválidas' } }),
         { status: 401 }
@@ -91,11 +84,8 @@ export async function POST(req) {
       .filter(Boolean)
       .join('; ');
 
-    console.log('4. Login exitoso. Generando token y cookie.');
-
     return new Response(
       JSON.stringify({
-        token,
         user: { id: user.CodSocio, nombre: user.NombreCompleto, rol: user.rol },
         mustChangePassword,
       }),

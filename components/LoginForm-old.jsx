@@ -1,17 +1,18 @@
+// components/LoginForm.jsx
 'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useUser } from '@/context/UserContext'; // Importar el hook
+import bcrypt from 'bcryptjs';
+import { useNavigate } from 'next/navigation';
 
 export default function LoginForm() {
   const [cedula, setCedula] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState(false); // ← Controla si se muestra la contraseña
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
-  const { fetchUser } = useUser(); // Obtener la función para refrescar el contexto
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -29,24 +30,34 @@ export default function LoginForm() {
 
       const data = await res.json();
 
-      if (!res.ok) {
-        setError(data.error?.message || 'Credenciales inválidas');
+      // Verificar si la contraseña es válida
+      const storedHash = data.storedHash;
+      const isValid = await bcrypt.compare(password, storedHash);
+
+      if (!isValid) {
+        setError('Contraseña inválida');
         return;
       }
 
-      // ¡Paso clave! Refrescar el contexto del usuario
-      await fetchUser();
+      // Guardar token en cookie y localStorage
+      document.cookie = `token=${data.token}; path=/; max-age=${
+        7 * 24 * 60 * 60
+      }; secure; samesite=strict`;
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('userData', JSON.stringify(data.user));
 
-      // Redirigir según lógica de negocio
+      // Si debe cambiar la contraseña, muestra mensaje y redirige
       if (data.mustChangePassword) {
         alert(
           'Por su seguridad, debe cambiar su contraseña antes de continuar.'
         );
         router.push('/change-password');
-      } else {
-        router.push('/dashboard');
+        return;
       }
 
+      // Redirigir al dashboard
+      const navigate = useNavigate();
+      navigate('/dashboard');
     } catch (err) {
       setError('Error de conexión con el servidor');
     } finally {
@@ -99,9 +110,6 @@ export default function LoginForm() {
             type="button"
             onClick={() => setShowPassword(!showPassword)}
             className="absolute top-6 right-0 translate-y-1/2 pr-3 flex items-center text-gray-500 hover:text-gray-700 focus:outline-none focus:text-blue-600 z-10"
-            aria-label={
-              showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'
-            }
           >
             {showPassword ? (
               <svg

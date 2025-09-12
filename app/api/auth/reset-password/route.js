@@ -57,17 +57,20 @@ export async function PUT(request) {
     // Hashear nueva contraseña
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    // Actualizar contraseña del socio y marcar token como usado (idealmente en una transacción)
-    // TODO: Envolver estas dos operaciones en una transacción
-    await db
-      .update(socios)
-      .set({ password: hashedPassword })
-      .where(eq(socios.CodSocio, tokenRecord.userId));
+    // Actualizar contraseña y token en una transacción
+    await db.transaction(async (tx) => {
+      // 1. Actualizar la contraseña del socio
+      await tx
+        .update(socios)
+        .set({ password: hashedPassword })
+        .where(eq(socios.CodSocio, tokenRecord.userId));
 
-    await db
-      .update(passwordResetTokens)
-      .set({ used: true })
-      .where(eq(passwordResetTokens.id, tokenRecord.id));
+      // 2. Marcar el token como utilizado
+      await tx
+        .update(passwordResetTokens)
+        .set({ used: true })
+        .where(eq(passwordResetTokens.id, tokenRecord.id));
+    });
 
     return NextResponse.json({
       message:

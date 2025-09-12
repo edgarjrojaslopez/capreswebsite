@@ -4,8 +4,8 @@
   "type": "module",
   "scripts": {
     "dev": "next dev",
-    "build": "cross-env NODE_ENV=production next build",
-    "start": "node server.js"
+    "build": "next build",
+    "start": "cross-env NODE_ENV=production node server.js"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
@@ -15,6 +15,7 @@
     "@tailwindcss/postcss": "^4.1.12",
     "@vercel/blob": "^1.1.1",
     "bcryptjs": "^3.0.2",
+    "cross-env": "^10.0.0",
     "date-fns": "^4.1.0",
     "dotenv": "^17.2.0",
     "drizzle-orm": "^0.28.0",
@@ -28,12 +29,10 @@
     "nodemailer": "^7.0.5",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "resend": "^6.0.1",
     "sharp": "^0.34.3",
     "styled-components": "^6.1.19",
     "xlsx": "^0.18.5",
-    "zod": "^3.22.2",
-    "cross-env": "^10.0.0"
+    "zod": "^3.22.2"
   },
   "devDependencies": {
     "@toolwind/anchors": "^1.0.10",

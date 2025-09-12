@@ -1,32 +1,46 @@
+// components/Header.jsx
 'use client';
 
 import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useUser } from '@/context/UserContext'; // Importar el hook del contexto
-import { logout } from '@/lib/auth'; // Importar logout original
 
 export default function Header() {
   const router = useRouter();
-  const { user, setUser, loading } = useUser(); // Usar el contexto
+  const [user, setUser] = useState(null);
   const [showMenu, setShowMenu] = useState(false); // Para el menú del usuario
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false); // Para el menú móvil
   const pathname = usePathname();
 
-  const handleLogout = () => {
-    logout(); // Limpia la cookie
-    setUser(null); // Actualiza el estado global
-    setMobileMenuOpen(false); // Cierra menú móvil
-    setShowMenu(false); // Cierra menú de usuario
-    router.push('/'); // Redirige al inicio
-  };
-
-  // Cierra los menús al cambiar de ruta
+  // Verificar token al cargar
   useEffect(() => {
-    setShowMenu(false);
-    setMobileMenuOpen(false);
+    const userDataString = localStorage.getItem('userData');
+
+    if (!userDataString) {
+      setUser(null);
+      return;
+    }
+
+    try {
+      const parsedUser = JSON.parse(userDataString);
+      setUser(parsedUser);
+    } catch (err) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
+      localStorage.removeItem('userId');
+      setUser(null);
+    }
   }, [pathname]);
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('userData');
+    localStorage.removeItem('userId');
+    setUser(null);
+    setMobileMenuOpen(false); // Cerrar menú móvil al salir
+    router.push('/');
+  };
 
   return (
     <header className="bg-blue-800 text-white shadow-md">
@@ -125,47 +139,46 @@ export default function Header() {
           </Link>
 
           {/* Menú de usuario (desktop) */}
-          {!loading &&
-            (user ? (
-              <div className="relative">
-                <button
-                  type="button"
-                  className="px-3 py-2 mx-auto rounded-md focus:outline-none"
-                  onClick={() => setShowMenu(!showMenu)}
-                >
-                  {user.NombreCompleto}
-                </button>
+          {user ? (
+            <div className="relative">
+              <button
+                type="button"
+                className="px-3 py-2 mx-auto rounded-md focus:outline-none"
+                onClick={() => setShowMenu(!showMenu)}
+              >
+                {user.nombre}
+              </button>
 
-                {showMenu && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white text-gray-800 rounded shadow-lg z-10">
-                    <Link
-                      href="/dashboard"
-                      className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-                      onClick={() => setShowMenu(false)}
-                    >
-                      Dashboard
-                    </Link>
-                    <Link
-                      href="/loans/request"
-                      className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-                      onClick={() => setShowMenu(false)}
-                    >
-                      Solicitar Préstamo
-                    </Link>
-                    <button
-                      onClick={handleLogout}
-                      className="block w-full text-left px-4 py-2 hover:bg-gray-100 w-full text-left"
-                    >
-                      Cerrar Sesión
-                    </button>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <Link href="/login" className="hover:underline">
-                Iniciar Sesión
-              </Link>
-            ))}
+              {showMenu && (
+                <div className="absolute right-0 mt-2 w-48 bg-white text-gray-800 rounded shadow-lg z-10">
+                  <Link
+                    href="/dashboard"
+                    className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                    onClick={() => setShowMenu(false)}
+                  >
+                    Dashboard
+                  </Link>
+                  <Link
+                    href="/loans/request"
+                    className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                    onClick={() => setShowMenu(false)}
+                  >
+                    Solicitar Préstamo
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="block w-full text-left px-4 py-2 hover:bg-gray-100 w-full text-left"
+                  >
+                    Cerrar Sesión
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <Link href="/login" className="hover:underline">
+              Iniciar Sesión
+            </Link>
+          )}
         </nav>
 
         {/* Menú Móvil (solo visible en móvil) */}
@@ -255,39 +268,38 @@ export default function Header() {
                 Contacto
               </Link>
 
-              {!loading &&
-                (user ? (
-                  <>
-                    <Link
-                      href="/dashboard"
-                      className="hover:underline"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      Dashboard
-                    </Link>
-                    <Link
-                      href="/loans/request"
-                      className="hover:underline"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      Solicitar Préstamo
-                    </Link>
-                    <button
-                      onClick={handleLogout}
-                      className="text-left hover:underline"
-                    >
-                      Cerrar Sesión
-                    </button>
-                  </>
-                ) : (
+              {user ? (
+                <>
                   <Link
-                    href="/login"
+                    href="/dashboard"
                     className="hover:underline"
                     onClick={() => setMobileMenuOpen(false)}
                   >
-                    Iniciar Sesión
+                    Dashboard
                   </Link>
-                ))}
+                  <Link
+                    href="/loans/request"
+                    className="hover:underline"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Solicitar Préstamo
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="text-left hover:underline"
+                  >
+                    Cerrar Sesión
+                  </button>
+                </>
+              ) : (
+                <Link
+                  href="/login"
+                  className="hover:underline"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Iniciar Sesión
+                </Link>
+              )}
             </nav>
           </div>
         )}
