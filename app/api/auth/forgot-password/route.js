@@ -19,16 +19,16 @@ export async function POST(request) {
 
     // Leer y validar cuerpo
     const body = await request.json();
-    const { email } = body;
+    const { cedula } = body;
 
-    if (!email || typeof email !== 'string' || email.trim() === '') {
+    if (!cedula || typeof cedula !== 'string' || cedula.trim() === '') {
       return NextResponse.json(
-        { error: 'El campo email es requerido' },
+        { error: 'El campo cédula es requerido' },
         { status: 400 }
       );
     }
 
-    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedCedula = cedula.trim();
 
     // Respuesta genérica por seguridad
     const successResponse = {
@@ -40,11 +40,19 @@ export async function POST(request) {
     const [user] = await db
       .select()
       .from(socios)
-      .where(eq(socios.Email, normalizedEmail))
+      .where(eq(socios.CodSocio, normalizedCedula))
       .limit(1);
 
     if (!user) {
       return NextResponse.json(successResponse);
+    }
+
+    // Verificar que el usuario tenga email
+    if (!user.Email) {
+      return NextResponse.json(
+        { error: 'El usuario no tiene email registrado' },
+        { status: 400 }
+      );
     }
 
     // Generar token seguro
@@ -71,7 +79,7 @@ export async function POST(request) {
       await sendPasswordResetEmail({
         email: user.Email,
         token: resetToken,
-        name: user.Nombre,
+        name: user.NombreCompleto,
       });
     } catch (emailError) {
       console.error('Error enviando correo:', emailError);

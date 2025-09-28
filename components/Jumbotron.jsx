@@ -10,7 +10,7 @@ export default function Jumbotron() {
         bg-gradient-to-r from-blue-800 via-blue-700 to-blue-600
         text-white
         px-6 py-16 md:py-24
-        min-h-[60vh] md:min-h-[75vh]
+        min-h-[60vh] md:min-h-[80vh]
         flex
         items-center
       "

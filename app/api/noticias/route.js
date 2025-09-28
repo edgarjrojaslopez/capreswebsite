@@ -1,4 +1,7 @@
 // app/api/noticias/route.js
+export const runtime = 'nodejs'; // Fuerza el uso de Node.js Runtime
+export const dynamic = 'force-dynamic'; // Desactiva la caché
+
 import { db } from '@/lib/db';
 import { noticias } from '@/lib/db/schema';
 import { NextResponse } from 'next/server';

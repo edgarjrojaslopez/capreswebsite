@@ -14,7 +14,7 @@ export default function DashboardPage() {
   const router = useRouter();
   const { data: session, status } = useSession();
 
-  // Función para probar la conexión a la BD y sesión del servidor
+  // Función para probar la conexión a la BD
   const testDatabaseConnection = async () => {
     try {
       console.log('🔍 Probando conexión a BD...');
@@ -29,30 +29,16 @@ export default function DashboardPage() {
     }
   };
 
-  // Nueva función para verificar sesión del servidor
-  const testServerSession = async () => {
+  // Nueva función para verificar datos financieros
+  const testFinancialData = async (userId) => {
     try {
-      console.log('🔍 Verificando sesión del servidor...');
-      const response = await fetch('/api/debug/session');
+      console.log('🔍 Verificando datos financieros para:', userId);
+      const response = await fetch(`/api/debug/financial?userId=${userId}`);
       const data = await response.json();
-      console.log('🔍 Sesión del servidor:', data);
+      console.log('🔍 Datos financieros:', data);
       return data;
     } catch (error) {
-      console.error('💥 Error verificando sesión del servidor:', error);
-      return null;
-    }
-  };
-
-  // Nueva función para verificar usuario específico
-  const testSpecificUser = async (userId) => {
-    try {
-      console.log('🔍 Verificando usuario específico:', userId);
-      const response = await fetch(`/api/debug/user?userId=${userId}`);
-      const data = await response.json();
-      console.log('🔍 Usuario específico:', data);
-      return data;
-    } catch (error) {
-      console.error('💥 Error verificando usuario específico:', error);
+      console.error('💥 Error verificando datos financieros:', error);
       return null;
     }
   };
@@ -60,7 +46,6 @@ export default function DashboardPage() {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        // Debug: mostrar estado de la sesión
         console.log('🔍 Estado de la sesión:', {
           session: !!session,
           status,
@@ -69,29 +54,20 @@ export default function DashboardPage() {
           hasTriedOnce
         });
 
-        // Si está cargando, esperar
         if (status === 'loading') {
           console.log('⏳ Cargando sesión...');
           return;
         }
 
-        // Si no hay sesión y ya intentamos, redirigir al login
         if (!session?.user && hasTriedOnce) {
           console.log('❌ No hay sesión después de intentar, redirigiendo al login');
           router.push('/login');
           return;
         }
 
-        // Si no hay sesión pero no hemos intentado, esperar más tiempo
         if (!session?.user && !hasTriedOnce) {
           console.log('⏳ Primera vez sin sesión, esperando más tiempo...');
           setHasTriedOnce(true);
-
-          // Verificar también la sesión del servidor y usuario específico
-          const serverSession = await testServerSession();
-          const userCheck = session?.user?.id ? await testSpecificUser(session.user.id) : null;
-
-          // Esperar más tiempo para que la sesión se estabilice
           setTimeout(() => {
             console.log('🔄 Reintentando después de espera...');
             window.location.reload();
@@ -102,7 +78,6 @@ export default function DashboardPage() {
         console.log('✅ Usuario autenticado:', session.user);
         setHasTriedOnce(true);
 
-        // Usar el ID del usuario autenticado
         const userId = session.user.id;
         console.log('📡 Llamando a API con userId:', userId);
 
@@ -129,7 +104,6 @@ export default function DashboardPage() {
             body: errorText
           });
 
-          // Si es error 404 (usuario no encontrado), mostrar debug info
           if (response.status === 404) {
             console.log('🔍 Usuario no encontrado, probando conexión a BD...');
             await testDatabaseConnection();
@@ -156,7 +130,6 @@ export default function DashboardPage() {
       }
     };
 
-    // Delay más largo para permitir que la sesión se estabilice completamente
     const timeoutId = setTimeout(() => {
       fetchDashboardData();
     }, 1000);
@@ -198,21 +171,6 @@ export default function DashboardPage() {
               className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
             >
               🔄 Recargar página
-            </button>
-
-            <button
-              onClick={async () => {
-                setError('');
-                setLoading(true);
-                setDebugInfo(null);
-                const sessionData = await testServerSession();
-                const dbData = await testDatabaseConnection();
-                console.log('🔍 Debug completo:', { sessionData, dbData });
-                window.location.reload();
-              }}
-              className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700"
-            >
-              🔍 Debug Completo
             </button>
 
             <button

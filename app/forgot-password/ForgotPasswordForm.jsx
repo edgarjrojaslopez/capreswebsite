@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { LockClosedIcon } from '@heroicons/react/24/outline';
 
 export default function ForgotPasswordForm() {
-  const [email, setEmail] = useState('');
+  const [cedula, setCedula] = useState('');
   const [status, setStatus] = useState({
     loading: false,
     error: '',
@@ -23,7 +23,7 @@ export default function ForgotPasswordForm() {
       const res = await fetch('/api/auth/forgot-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim() }),
+        body: JSON.stringify({ cedula: cedula.trim() }),
       });
 
       // Manejar errores HTTP
@@ -70,19 +70,18 @@ export default function ForgotPasswordForm() {
         <>
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
-              <label htmlFor="email" className="sr-only">
-                Email
+              <label htmlFor="cedula" className="sr-only">
+                Cédula
               </label>
               <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
+                id="cedula"
+                name="cedula"
+                type="text"
                 required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={cedula}
+                onChange={(e) => setCedula(e.target.value)}
                 className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="correo@ejemplo.com"
+                placeholder="Ingrese su cédula"
               />
             </div>
           </div>
@@ -91,7 +90,6 @@ export default function ForgotPasswordForm() {
             <button
               type="submit"
               disabled={status.loading}
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
             >
               {status.loading ? (
                 <>

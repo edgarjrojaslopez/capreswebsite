@@ -3,25 +3,26 @@ export const runtime = 'nodejs';
 import { db } from '@/lib/db';
 import { socios } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
-import { SignJWT } from 'jose';
 import bcrypt from 'bcryptjs';
-
-const JWT_SECRET = process.env.JWT_SECRET;
-
-if (!JWT_SECRET) {
-  console.error('❌ ERROR FATAL: JWT_SECRET no está definido');
-}
 
 export async function POST(req) {
   try {
     const { cedula, password } = await req.json();
+    console.log('Intento de login para cédula:', cedula);
 
+    // Validaciones de entrada
     if (!cedula || !password) {
       return new Response(
-        JSON.stringify({
-          error: { message: 'Cédula y contraseña requeridas' },
-        }),
-        { status: 400 }
+        JSON.stringify({ error: { message: 'Cédula y contraseña son requeridas' } }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Validar cédula
+    if (!/^\d{1,10}$/.test(cedula)) {
+      return new Response(
+        JSON.stringify({ error: { message: 'La cédula debe contener solo números (máximo 10 dígitos)' } }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
@@ -30,21 +31,29 @@ export async function POST(req) {
       .from(socios)
       .where(eq(socios.CodSocio, cedula));
 
+    console.log('Usuario encontrado en BD:', user ? 'Sí' : 'No');
+
     if (!user) {
       return new Response(
         JSON.stringify({ error: { message: 'Credenciales inválidas' } }),
-        { status: 401 }
+        { status: 401, headers: { 'Content-Type': 'application/json' } }
       );
     }
+
+    console.log('Comparando contraseñas...');
+    console.log('Contraseña proporcionada:', password);
+    console.log('Hash almacenado:', user.password);
 
     const isValid = await bcrypt.compare(password, user.password);
 
     if (!isValid) {
       return new Response(
         JSON.stringify({ error: { message: 'Credenciales inválidas' } }),
-        { status: 401 }
+        { status: 401, headers: { 'Content-Type': 'application/json' } }
       );
     }
+
+    console.log('Resultado de bcrypt.compare:', isValid);
 
     // Detecta si la contraseña es la predeterminada
     let mustChangePassword = false;
@@ -52,56 +61,33 @@ export async function POST(req) {
       mustChangePassword = true;
     }
 
-    if (!JWT_SECRET) {
-      console.error('JWT_SECRET no está definido');
-      return new Response(
-        JSON.stringify({ error: { message: 'Error interno del servidor' } }),
-        { status: 500 }
-      );
-    }
+    // Devolver respuesta en el formato que espera NextAuth
+    const responseData = {
+      user: {
+        id: user.CodSocio,
+        nombre: user.NombreCompleto,
+        rol: user.rol,
+        email: user.Email || `${user.CodSocio}@capres.com`
+      },
+      mustChangePassword
+    };
 
-    const secret = new TextEncoder().encode(JWT_SECRET);
-    const token = await new SignJWT({
-      cedula: user.CodSocio,
-      nombre: user.NombreCompleto,
-      rol: user.rol,
-      mustChangePassword,
-    })
-      .setProtectedHeader({ alg: 'HS256' })
-      .setExpirationTime('7d')
-      .sign(secret);
-
-    // Establecer cookie httpOnly
-    const isProd = process.env.NODE_ENV === 'production';
-    const cookie = [
-      `token=${token}`,
-      'Path=/',
-      'HttpOnly',
-      'SameSite=Strict',
-      isProd ? 'Secure' : '', // Solo Secure en producción
-      'Max-Age=604800', // 7 días
-    ]
-      .filter(Boolean)
-      .join('; ');
+    console.log('Enviando respuesta de login:', JSON.stringify(responseData, null, 2));
 
     return new Response(
-      JSON.stringify({
-        user: { id: user.CodSocio, nombre: user.NombreCompleto, rol: user.rol },
-        mustChangePassword,
-      }),
+      JSON.stringify(responseData),
       {
         status: 200,
         headers: {
-          'Set-Cookie': cookie,
           'Content-Type': 'application/json',
         },
       }
     );
   } catch (error) {
-    console.error('--- ERROR INESPERADO EN LOGIN ---', error);
+    console.error('Error en login:', error);
     return new Response(
       JSON.stringify({ error: { message: 'Error interno del servidor' } }),
-      { status: 500 }
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
 }

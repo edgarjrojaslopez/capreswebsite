@@ -1,7 +1,7 @@
 // app/loans/page.jsx
 'use client';
 
-import Header from '@/components/Header';
+import Header from '@/components/Header02';
 import Footer from '@/components/Footer';
 import LoansPage from '@/components/LoansPage';
 

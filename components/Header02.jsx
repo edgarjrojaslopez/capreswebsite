@@ -1,55 +1,29 @@
-// components/Header.jsx
 'use client';
 
 import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useSession, signOut } from 'next-auth/react';
+import { useSession, signIn, signOut } from 'next-auth/react'; // ✅ NUEVO
 
 export default function Header() {
-  const router = useRouter();
-  const { data: session, status } = useSession();
-  const [showMenu, setShowMenu] = useState(false); // Para el menú del usuario
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false); // Para el menú móvil
+  // const router = useRouter();
   const pathname = usePathname();
+  const { session, status } = useSession(); // ✅ NextAuth
+  const loading = status === 'loading';
+  const user = session?.user; // ✅ Datos del usuario
+
+  const [showMenu, setShowMenu] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleLogout = async () => {
-    try {
-      await signOut({ callbackUrl: '/' });
-      setMobileMenuOpen(false); // Cerrar menú móvil al salir
-      setShowMenu(false);
-    } catch (error) {
-      console.error('Error during logout:', error);
-      // Fallback: redirect to home
-      router.push('/');
-    }
+    await signOut({ callbackUrl: '/' });
   };
 
-  // Mostrar loading mientras se verifica la sesión
-  if (status === 'loading') {
-    return (
-      <header className="bg-blue-800 text-white shadow-md">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center space-x-3">
-            <Link href="/" className="flex items-center space-x-4 hover:opacity-90 transition-opacity">
-              <div className="relative w-14 h-14 md:w-16 md:h-16 bg-white p-1">
-                <Image
-                  src="/assets/images/capres.jpg"
-                  alt="Logo CAPRES"
-                  fill
-                  sizes="(max-width: 768px) 48px, 64px"
-                  className="object-contain"
-                  priority
-                />
-              </div>
-            </Link>
-          </div>
-          <div className="text-white">Cargando...</div>
-        </div>
-      </header>
-    );
-  }
+  useEffect(() => {
+    setShowMenu(false);
+    setMobileMenuOpen(false);
+  }, [pathname]);
 
   return (
     <header className="bg-blue-800 text-white shadow-md">
@@ -104,15 +78,14 @@ export default function Header() {
           </Link>
         </div>
 
-        {/* Menú Desktop (oculto en móvil) */}
-        <nav className="hidden md:flex space-x-8  items-center">
+        {/* Menú Desktop */}
+        <nav className="hidden md:flex space-x-8 items-center">
           <Link href="/" className="hover:underline">
             Inicio
           </Link>
           <Link href="/about" className="hover:underline">
             Nosotros
           </Link>
-          {/* Menú de Servicios */}
           <div className="relative group">
             <button
               type="button"
@@ -147,53 +120,56 @@ export default function Header() {
             Contacto
           </Link>
 
-          {/* Menú de usuario (desktop) */}
-          {session?.user ? (
-            <div className="relative">
-              <button
-                type="button"
-                className="px-3 py-2 mx-auto rounded-md focus:outline-none bg-blue-700 hover:bg-blue-600 transition-colors"
-                onClick={() => setShowMenu(!showMenu)}
-              >
-                👤 {session.user.name || session.user.nombre || 'Usuario'}
-              </button>
+          {/* Menú de usuario */}
+          {!loading &&
+            (user ? (
+              <div className="relative">
+                <button
+                  type="button"
+                  className="px-3 py-2 mx-auto rounded-md focus:outline-none"
+                  onClick={() => setShowMenu(!showMenu)}
+                >
+                  {user.name} {/* ← Muestra NombreCompleto */}
+                </button>
 
-              {showMenu && (
-                <div className="absolute right-0 mt-2 w-48 bg-white text-gray-800 rounded shadow-lg z-10">
-                  <Link
-                    href="/dashboard"
-                    className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-                    onClick={() => setShowMenu(false)}
-                  >
-                    Dashboard
-                  </Link>
-                  <Link
-                    href="/loans/request"
-                    className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-                    onClick={() => setShowMenu(false)}
-                  >
-                    Solicitar Préstamo
-                  </Link>
-                  <button
-                    onClick={handleLogout}
-                    className="block w-full text-left px-4 py-2 hover:bg-gray-100 w-full text-left text-red-600 hover:text-red-700"
-                  >
-                    🚪 Cerrar Sesión
-                  </button>
-                </div>
-              )}
-            </div>
-          ) : (
-            <Link href="/login" className="hover:underline bg-blue-700 px-4 py-2 rounded transition-colors hover:bg-blue-600">
-              🔐 Iniciar Sesión
-            </Link>
-          )}
+                {showMenu && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white text-gray-800 rounded shadow-lg z-10">
+                    <Link
+                      href="/dashboard"
+                      className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                      onClick={() => setShowMenu(false)}
+                    >
+                      Dashboard
+                    </Link>
+                    <Link
+                      href="/loans/request"
+                      className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                      onClick={() => setShowMenu(false)}
+                    >
+                      Solicitar Préstamo
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                    >
+                      Cerrar Sesión
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <button
+                onClick={() => signIn('credentials')}
+                className="hover:underline px-3 py-2"
+              >
+                Iniciar Sesión
+              </button>
+            ))}
         </nav>
 
-        {/* Menú Móvil (solo visible en móvil) */}
+        {/* Menú Móvil */}
         {mobileMenuOpen && (
           <div className="md:hidden fixed inset-0 bg-blue-800 text-white z-50 flex flex-col p-6">
-            {/* Botón de cierre */}
             <div className="flex justify-end mb-6">
               <button
                 onClick={() => setMobileMenuOpen(false)}
@@ -217,7 +193,6 @@ export default function Header() {
               </button>
             </div>
 
-            {/* Enlaces del menú */}
             <nav className="flex-1 flex flex-col space-y-6 text-xl">
               <Link
                 href="/"
@@ -233,8 +208,6 @@ export default function Header() {
               >
                 Nosotros
               </Link>
-
-              {/* Servicios en móvil */}
               <div>
                 <span className="font-bold">Servicios</span>
                 <div className="flex flex-col space-y-4 pl-4 mt-2">
@@ -254,7 +227,6 @@ export default function Header() {
                   </Link>
                 </div>
               </div>
-
               <Link
                 href="/delegates"
                 className="hover:underline"
@@ -277,38 +249,38 @@ export default function Header() {
                 Contacto
               </Link>
 
-              {session?.user ? (
-                <>
-                  <Link
-                    href="/dashboard"
-                    className="hover:underline"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    Dashboard
-                  </Link>
-                  <Link
-                    href="/loans/request"
-                    className="hover:underline"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    Solicitar Préstamo
-                  </Link>
+              {!loading &&
+                (user ? (
+                  <>
+                    <Link
+                      href="/dashboard"
+                      className="hover:underline"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      Dashboard
+                    </Link>
+                    <Link
+                      href="/loans/request"
+                      className="hover:underline"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      Solicitar Préstamo
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="text-left hover:underline"
+                    >
+                      Cerrar Sesión
+                    </button>
+                  </>
+                ) : (
                   <button
-                    onClick={handleLogout}
-                    className="text-left hover:underline text-red-300 hover:text-red-200"
+                    onClick={() => signIn('credentials')}
+                    className="hover:underline"
                   >
-                    🚪 Cerrar Sesión
+                    Iniciar Sesión
                   </button>
-                </>
-              ) : (
-                <Link
-                  href="/login"
-                  className="hover:underline"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  🔐 Iniciar Sesión
-                </Link>
-              )}
+                ))}
             </nav>
           </div>
         )}

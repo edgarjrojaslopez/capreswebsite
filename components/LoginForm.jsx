@@ -1,8 +1,12 @@
+// components/LoginForm.jsx
 'use client';
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { signIn, getSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { useUser } from '@/context/UserContext'; // Importar el hook
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 export default function LoginForm() {
   const [cedula, setCedula] = useState('');
@@ -10,44 +14,79 @@ export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
   const router = useRouter();
-  const { fetchUser } = useUser(); // Obtener la función para refrescar el contexto
+
+  useEffect(() => {
+    // Verificar si ya está autenticado y redirigir al dashboard
+    const checkAuth = async () => {
+      try {
+        const session = await getSession();
+        if (session?.user) {
+          console.log('Usuario ya autenticado, redirigiendo al dashboard');
+          router.push('/dashboard');
+        }
+      } catch (error) {
+        console.error('Error verificando sesión:', error);
+      }
+    };
+
+    checkAuth();
+  }, [router]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
     setLoading(true);
+    setError('');
 
     try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ cedula, password }),
+      console.log('🔐 Intentando login con cédula:', cedula);
+
+      const result = await signIn('credentials', {
+        redirect: false,
+        cedula: cedula.trim(),
+        password,
       });
 
-      const data = await res.json();
+      console.log('📡 Resultado de signIn:', result);
 
-      if (!res.ok) {
-        setError(data.error?.message || 'Credenciales inválidas');
+      if (result?.error) {
+        console.error('❌ Error de autenticación:', result.error);
+        setError('Cédula o contraseña incorrectos');
         return;
       }
 
-      // ¡Paso clave! Refrescar el contexto del usuario
-      await fetchUser();
+      if (result?.ok) {
+        console.log('✅ Login exitoso, redirigiendo al dashboard');
 
-      // Redirigir según lógica de negocio
-      if (data.mustChangePassword) {
-        alert(
-          'Por su seguridad, debe cambiar su contraseña antes de continuar.'
-        );
-        router.push('/change-password');
-      } else {
+        // Verificar que la sesión se estableció correctamente antes de redirigir
+        let retries = 0;
+        const maxRetries = 10;
+
+        while (retries < maxRetries) {
+          try {
+            const session = await getSession();
+            if (session?.user) {
+              console.log('✅ Sesión confirmada, redirigiendo...');
+              router.push('/dashboard');
+              return;
+            }
+          } catch (error) {
+            console.log('⏳ Esperando sesión...', retries + 1);
+          }
+
+          retries++;
+          await new Promise(resolve => setTimeout(resolve, 200));
+        }
+
+        console.log('⚠️ Timeout esperando sesión, redirigiendo de todos modos');
         router.push('/dashboard');
+      } else {
+        console.error('❌ Resultado inesperado:', result);
+        setError('Error inesperado durante el login');
       }
-
-    } catch (err) {
+    } catch (error) {
+      console.error('💥 Error en handleSubmit:', error);
       setError('Error de conexión con el servidor');
     } finally {
       setLoading(false);
@@ -55,111 +94,74 @@ export default function LoginForm() {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow">
-      <h2 className="text-2xl font-bold mb-6 text-center">🔐 Iniciar Sesión</h2>
-
-      <form onSubmit={handleSubmit} className="space-y-5">
-        {/* Campo Cédula */}
-        <div>
-          <label
-            htmlFor="cedula"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
-            Cédula
-          </label>
-          <input
-            type="text"
-            id="cedula"
-            value={cedula}
-            onChange={(e) => setCedula(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none"
-            placeholder="Ingresa tu cédula"
-            required
-          />
-        </div>
-
-        {/* Campo Contraseña con ícono de ojo */}
-        <div className="relative">
-          <label
-            htmlFor="password"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
-            Contraseña
-          </label>
-          <input
-            type={showPassword ? 'text' : 'password'}
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none pr-10"
-            placeholder="Ingresa tu contraseña"
-            required
-          />
-          <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className="absolute top-6 right-0 translate-y-1/2 pr-3 flex items-center text-gray-500 hover:text-gray-700 focus:outline-none focus:text-blue-600 z-10"
-            aria-label={
-              showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'
-            }
-          >
-            {showPassword ? (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-5 w-5"
-              >
-                <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24" />
-                <line x1="1" y1="1" x2="23" y2="23" />
-              </svg>
-            ) : (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-5 w-5"
-              >
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                <circle cx="12" cy="12" r="3" />
-              </svg>
-            )}
-          </button>
-        </div>
-
-        {/* Mensaje de error */}
+    <div className="w-full max-w-md mx-auto">
+      <form onSubmit={handleSubmit} className="space-y-4">
         {error && (
-          <div className="text-red-600 text-sm text-center bg-red-50 py-2 px-3 rounded">
-            {error}
-          </div>
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
         )}
 
-        {/* Enlace a recuperación de contraseña */}
-        <div className="text-center">
+        <div className="space-y-2">
+          <Label htmlFor="cedula">Cédula</Label>
+          <Input
+            id="cedula"
+            type="text"
+            placeholder="Ingrese su cédula"
+            value={cedula}
+            onChange={(e) => setCedula(e.target.value)}
+            required
+            disabled={loading}
+            maxLength={20}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="password">Contraseña</Label>
+          <div className="relative">
+            <Input
+              id="password"
+              type={showPassword ? 'text' : 'password'}
+              placeholder="Ingrese su contraseña"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              disabled={loading}
+              maxLength={100}
+            />
+            <button
+              type="button"
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+              onClick={() => setShowPassword(!showPassword)}
+              disabled={loading}
+            >
+              {showPassword ? '🙈' : '👁️'}
+            </button>
+          </div>
+        </div>
+
+        <Button
+          type="submit"
+          className="w-full"
+          disabled={loading}
+        >
+          {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
+        </Button>
+
+        <div className="text-center space-y-2">
           <a
             href="/forgot-password"
-            className="text-blue-600 hover:underline text-sm"
+            className="text-sm text-gray-600 hover:text-blue-600"
           >
             ¿Olvidaste tu contraseña?
           </a>
+          <div className="text-sm text-gray-600">
+            ¿No tienes cuenta?{' '}
+            <a href="/registro" className="text-blue-600 hover:underline">
+              Regístrate aquí
+            </a>
+          </div>
         </div>
-
-        {/* Botón de envío */}
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full py-2.5 px-4 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 disabled:bg-blue-300 transition"
-        >
-          {loading ? 'Iniciando...' : 'Iniciar Sesión'}
-        </button>
       </form>
     </div>
   );

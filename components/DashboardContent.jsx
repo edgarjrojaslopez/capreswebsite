@@ -76,8 +76,11 @@ export default function DashboardContent({
   const ultimoPrestamo =
     prestamosData.length > 0 ? prestamosData[prestamosData.length - 1] : null;
 
+  // Tomar el primer elemento del array de haberes (debería haber solo uno por usuario)
+  const haberData = haberesData && haberesData.length > 0 ? haberesData[0] : {};
+
   // Calcular disponible: 80% de haberes - préstamos activos
-  const disponibleBase = (haberesData?.totalH || 0) * 0.8;
+  const disponibleBase = (haberData?.totalH || 0) * 0.8;
   const disponibleNeto = Math.max(0, disponibleBase - totalPrestamos);
 
   // Handlers
@@ -326,7 +329,7 @@ export default function DashboardContent({
             {/* [Las tarjetas permanecen igual] */}
             <DashboardCard
               title="Total Haberes"
-              value={formatNumber(haberesData?.totalH)}
+              value={formatNumber(haberData?.totalH)}
               icon="💰"
               color="from-blue-500 to-blue-600"
               description="Tu acumulado total"
@@ -346,21 +349,21 @@ export default function DashboardContent({
             />
             <DashboardCard
               title="Último Retiro"
-              value={formatNumber(haberesData?.retiroH)}
+              value={formatNumber(haberData?.retiroH)}
               icon="💵"
               color="from-green-500 to-green-600"
               description="Monto más reciente"
             />
             <DashboardCard
               title="Aporte Socio"
-              value={formatNumber(haberesData?.aporteS)}
+              value={formatNumber(haberData?.aporteS)}
               icon="🧍"
               color="from-yellow-500 to-yellow-600"
               description="Tu contribución mensual"
             />
             <DashboardCard
               title="Aporte Patrono"
-              value={formatNumber(haberesData?.aporteP)}
+              value={formatNumber(haberData?.aporteP)}
               icon="🏢"
               color="from-purple-500 to-purple-600"
               description="Aporte de la empresa"

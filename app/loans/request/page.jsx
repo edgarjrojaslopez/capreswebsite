@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Header from '@/components/Header';
+import Header from '@/components/Header02';
 import Footer from '@/components/Footer';
 import LoanForm from '@/components/LoanForm';
 

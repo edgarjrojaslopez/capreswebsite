@@ -11,7 +11,7 @@ export default function ForgotPasswordPage() {
             Recuperar contraseña
           </h1>
           <p className="mt-2 text-gray-600">
-            Ingresa tu email para recibir un enlace de recuperación
+            Ingresa tu cédula para recibir un enlace de recuperación
           </p>
         </div>
 
