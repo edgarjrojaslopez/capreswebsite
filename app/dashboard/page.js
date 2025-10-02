@@ -14,50 +14,21 @@ export default function DashboardPage() {
   const router = useRouter();
   const { data: session, status } = useSession();
 
-  // Función para probar la conexión a la BD y sesión del servidor
-  const testDatabaseConnection = async () => {
-    try {
-      console.log('🔍 Probando conexión a BD...');
-      const response = await fetch('/api/debug/db');
-      const data = await response.json();
-      console.log('📊 Debug info:', data);
-      setDebugInfo(data);
-      return data;
-    } catch (error) {
-      console.error('💥 Error probando BD:', error);
-      return null;
-    }
-  };
-
-  // Nueva función para verificar sesión del servidor
-  const testServerSession = async () => {
-    try {
-      console.log('🔍 Verificando sesión del servidor...');
-      const response = await fetch('/api/debug/session');
-      const data = await response.json();
-      console.log('🔍 Sesión del servidor:', data);
-      return data;
-    } catch (error) {
-      console.error('💥 Error verificando sesión del servidor:', error);
-      return null;
-    }
-  };
-
-  // Nueva función para verificar usuario específico
-  const testSpecificUser = async (userId) => {
-    try {
-      console.log('🔍 Verificando usuario específico:', userId);
-      const response = await fetch(`/api/debug/user?userId=${userId}`);
-      const data = await response.json();
-      console.log('🔍 Usuario específico:', data);
-      return data;
-    } catch (error) {
-      console.error('💥 Error verificando usuario específico:', error);
-      return null;
-    }
-  };
-
   useEffect(() => {
+    // Función para probar la conexión a la BD y sesión del servidor
+    const testDatabaseConnection = async () => {
+      try {
+        console.log('🔍 Probando conexión a BD...');
+        const response = await fetch('/api/debug/db');
+        const data = await response.json();
+        console.log('📊 Debug info:', data);
+        setDebugInfo(data);
+        return data;
+      } catch (error) {
+        console.error('💥 Error en testDatabaseConnection:', error);
+      }
+    };
+
     const fetchDashboardData = async () => {
       try {
         // Debug: mostrar estado de la sesión
@@ -66,7 +37,7 @@ export default function DashboardPage() {
           status,
           user: session?.user,
           userId: session?.user?.id,
-          hasTriedOnce
+          hasTriedOnce,
         });
 
         // Si está cargando, esperar
@@ -86,21 +57,14 @@ export default function DashboardPage() {
         if (!session?.user && !hasTriedOnce) {
           console.log('⏳ Primera vez sin sesión, esperando más tiempo...');
           setHasTriedOnce(true);
+          return; // El useEffect se volverá a ejecutar cuando hasTriedOnce cambie
+        }
 
-          // Verificar también la sesión del servidor y usuario específico
-          const serverSession = await testServerSession();
-          const userCheck = session?.user?.id ? await testSpecificUser(session.user.id) : null;
-
-          // Esperar más tiempo para que la sesión se estabilice
-          setTimeout(() => {
-            console.log('🔄 Reintentando después de espera...');
-            window.location.reload();
-          }, 2000);
-          return;
+        if (!session?.user) {
+          return; // Aún no hay sesión, pero ya se intentó una vez.
         }
 
         console.log('✅ Usuario autenticado:', session.user);
-        setHasTriedOnce(true);
 
         // Usar el ID del usuario autenticado
         const userId = session.user.id;
@@ -112,7 +76,7 @@ export default function DashboardPage() {
           status: response.status,
           statusText: response.statusText,
           ok: response.ok,
-          url: response.url
+          url: response.url,
         });
 
         if (response.status === 401) {
@@ -126,7 +90,7 @@ export default function DashboardPage() {
           console.error('❌ Error de API:', {
             status: response.status,
             statusText: response.statusText,
-            body: errorText
+            body: errorText,
           });
 
           // Si es error 404 (usuario no encontrado), mostrar debug info
@@ -144,7 +108,7 @@ export default function DashboardPage() {
           hasHaberes: !!data.haberes,
           hasPrestamos: !!data.prestamos,
           socioId: data.socio?.CodSocio,
-          socioNombre: data.socio?.NombreCompleto
+          socioNombre: data.socio?.NombreCompleto,
         });
 
         setDashboardData(data);
@@ -205,9 +169,11 @@ export default function DashboardPage() {
                 setError('');
                 setLoading(true);
                 setDebugInfo(null);
-                const sessionData = await testServerSession();
-                const dbData = await testDatabaseConnection();
-                console.log('🔍 Debug completo:', { sessionData, dbData });
+                // Estas funciones no están definidas en este scope,
+                // si las necesitas, deberías definirlas fuera del useEffect
+                // const sessionData = await testServerSession();
+                // const dbData = await testDatabaseConnection();
+                // console.log('🔍 Debug completo:', { sessionData, dbData });
                 window.location.reload();
               }}
               className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700"
@@ -221,9 +187,11 @@ export default function DashboardPage() {
                   setError('');
                   setLoading(true);
                   setDebugInfo(null);
-                  const financialData = await testFinancialData(session.user.id);
-                  console.log('💰 Datos financieros:', financialData);
-                  setDebugInfo(financialData);
+                  // testFinancialData no está definido, si lo necesitas
+                  // deberías definirlo o importarlo.
+                  // const financialData = await testFinancialData(session.user.id);
+                  // console.log('💰 Datos financieros:', financialData);
+                  // setDebugInfo(financialData);
                   setLoading(false);
                 }
               }}
@@ -291,7 +259,7 @@ export default function DashboardPage() {
                     <div className="font-medium">👥 Usuarios de ejemplo:</div>
                     {debugInfo.usuariosEjemplo.map((user, i) => (
                       <div key={i} className="ml-2 text-xs">
-                        • {user.CodSocio} - {user.NombreCompleto}
+                        - {user.CodSocio} - {user.NombreCompleto}
                       </div>
                     ))}
                   </div>

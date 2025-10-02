@@ -2,8 +2,7 @@
 'use client';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-
-const token = '';
+import { useSession } from 'next-auth/react';
 
 export default function DashboardContent({
   userData,
@@ -11,100 +10,65 @@ export default function DashboardContent({
   prestamosData,
   codSocio,
 }) {
+  const { data: session } = useSession(); // Obtener la sesión del usuario
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({});
   const [showLoanModal, setShowLoanModal] = useState(false);
   const [showLoanFormModal, setShowLoanFormModal] = useState(false);
   const [selectedLoanType, setSelectedLoanType] = useState('');
-  const [loanForm, setLoanForm] = useState({
-    amount: '',
-    reason: '',
-  });
+  const [loanForm, setLoanForm] = useState({ amount: '', reason: '' });
   const [avatar, setAvatar] = useState('/avatar-default.png');
   const [changePasswordModal, setChangePasswordModal] = useState(false);
-
-  // Modal para retiro
   const [showRetiroFormModal, setShowRetiroFormModal] = useState(false);
   const [showRetiroModal, setShowRetiroModal] = useState(false);
   const [selectedRetiroType, setSelectedRetiroType] = useState('');
-  const [retiroForm, setRetiroForm] = useState({
-    amount: '',
-    reason: '',
-  });
-
-  
-  console.log('🔍 DashboardContent - codSocio:', codSocio);
-  console.log('🔍 DashboardContent - userData:', userData);
-  // console.log('🔍 Headers:', Object.fromEntries(request.headers.entries()));
-  // console.log('🔍 Content-Type:', request.headers.get('content-type'));
+  const [retiroForm, setRetiroForm] = useState({ amount: '', reason: '' });
 
   if (!userData || !codSocio) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <div className="text-lg text-red-600">
-          Error: No se pudieron cargar los datos del usuario
-        </div>
+        <div className="text-lg text-red-600">Error: No se pudieron cargar los datos del usuario</div>
       </div>
     );
   }
 
-  // Formatear fechas
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return 'Inválida';
-    return new Intl.DateTimeFormat('es-VE', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    }).format(date);
+    return new Intl.DateTimeFormat('es-VE', { day: '2-digit', month: 'short', year: 'numeric' }).format(date);
   };
 
-  // Formatear números
   const formatNumber = (value) => {
-    return new Intl.NumberFormat('es-VE', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(value || 0);
+    return new Intl.NumberFormat('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value || 0);
   };
 
-  // Calcular préstamos activos
-  const totalPrestamos = prestamosData.reduce(
-    (acc, p) => acc + p.saldoPrest,
-    0
-  );
-  const ultimoPrestamo =
-    prestamosData.length > 0 ? prestamosData[prestamosData.length - 1] : null;
-
-  // Tomar el primer elemento del array de haberes (debería haber solo uno por usuario)
+  const totalPrestamos = prestamosData.reduce((acc, p) => acc + p.saldoPrest, 0);
+  const ultimoPrestamo = prestamosData.length > 0 ? prestamosData[prestamosData.length - 1] : null;
   const haberData = haberesData && haberesData.length > 0 ? haberesData[0] : {};
-
-  // Calcular disponible: 80% de haberes - préstamos activos
   const disponibleBase = (haberData?.totalH || 0) * 0.8;
   const disponibleNeto = Math.max(0, disponibleBase - totalPrestamos);
 
-  // Handlers
-  const handleChange = (e) =>
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSave = async () => {
     try {
-      const allowedFields = {
-        Telefonos: form.Telefonos,
-        Email: form.Email,
-      };
+      const allowedFields = { Telefonos: form.Telefonos, Email: form.Email };
+      if (!session?.accessToken) {
+        alert('Error de autenticación. Por favor, inicia sesión de nuevo.');
+        return;
+      }
       const res = await fetch(`/api/socios/${codSocio}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.accessToken}` },
         body: JSON.stringify(allowedFields),
       });
       if (res.ok) {
         setEditing(false);
         alert('Datos actualizados correctamente');
       } else {
-        alert('Error al actualizar los datos');
+        const errorData = await res.json();
+        alert(`Error al actualizar los datos: ${errorData.message || 'Error desconocido'}`);
       }
     } catch (err) {
       console.error('Error al guardar:', err);
@@ -114,25 +78,22 @@ export default function DashboardContent({
 
   const handleAvatarChange = async (e) => {
     const file = e.target.files[0];
-    if (!file) return;
-
-    if (!file.type.startsWith('image/')) {
+    if (!file || !file.type.startsWith('image/')) {
       alert('Por favor selecciona una imagen válida');
       return;
     }
-
     const formData = new FormData();
     formData.append('avatar', file);
-
     try {
+      if (!session?.accessToken) {
+        alert('Error de autenticación. Por favor, inicia sesión de nuevo.');
+        return;
+      }
       const res = await fetch(`/api/socios/${codSocio}/avatar`, {
         method: 'PUT',
-        headers: {
-          // NO pongas 'Content-Type'
-        },
+        headers: { Authorization: `Bearer ${session.accessToken}` },
         body: formData,
       });
-
       const data = await res.json();
       if (res.ok) {
         setAvatar(data.avatarUrl);
@@ -146,10 +107,7 @@ export default function DashboardContent({
   };
 
   const handleEdit = () => {
-    setForm({
-      Telefonos: userData.Telefonos || '',
-      Email: userData.Email || '',
-    });
+    setForm({ Telefonos: userData.Telefonos || '', Email: userData.Email || '' });
     setEditing(true);
   };
 
@@ -165,20 +123,6 @@ export default function DashboardContent({
       return;
     }
     try {
-      // const response = await fetch('/api/send-email', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //     Authorization: `Bearer ${token}`,
-      //   },
-      //   body: JSON.stringify({
-      //     to: 'support@capreswebsite.capres.com.ve',
-      //     subject: `Solicitud de ${selectedLoanType.name} - ${
-      //       userData.NombreCompleto || userData.CodSocio
-      //     }`,
-      //     html: htmlTemplate,
-      //   }),
-      // });
       const response = await fetch('/api/send-email', {
         method: 'POST',
         headers: {
@@ -187,9 +131,10 @@ export default function DashboardContent({
         body: JSON.stringify({
           to: process.env.NEXT_PUBLIC_EMAIL_TO,
           subject: `Solicitud de ${selectedLoanType.name} - ${userData.NombreCompleto}`,
-          userData, // ← Enviado completo
+          userData,
           selectedLoanType,
           loanForm,
+          tipoSolicitud: 'prestamo', // Añadir un identificador para el tipo de solicitud
         }),
       });
 
@@ -205,7 +150,7 @@ export default function DashboardContent({
         throw new Error(data.error || 'Error al enviar el correo');
       }
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Error al enviar la solicitud de préstamo:', error);
       alert('Error al enviar la solicitud. Inténtalo nuevamente.');
     }
   };
@@ -217,25 +162,9 @@ export default function DashboardContent({
   };
 
   const handleRetiroSubmit = async () => {
-    if (!retiroForm.reason.trim()) {
-      alert('Por favor indica la razón del retiro');
+    if (!retiroForm.amount || !retiroForm.reason) {
+      alert('Por favor completa todos los campos');
       return;
-    }
-
-    let monto = 0;
-
-    if (selectedRetiroType.id === 'parcial') {
-      monto = parseFloat(retiroForm.amount);
-      if (isNaN(monto) || monto <= 0) {
-        alert('Ingresa un monto válido');
-        return;
-      }
-      if (monto > disponibleNeto) {
-        alert(`El monto no puede exceder Bs. ${formatNumber(disponibleNeto)}`);
-        return;
-      }
-    } else {
-      monto = disponibleNeto;
     }
 
     try {
@@ -246,40 +175,35 @@ export default function DashboardContent({
         },
         body: JSON.stringify({
           to: process.env.NEXT_PUBLIC_EMAIL_TO,
-          subject: `Solicitud de Retiro de Haberes - ${userData.NombreCompleto}`,
+          subject: `Solicitud de ${selectedRetiroType.name} - ${userData.NombreCompleto}`,
           userData,
-          tipoSolicitud: 'retiro',
-          tipoRetiro: selectedRetiroType.id,
-          montoSolicitado: monto,
-          razon: retiroForm.reason,
+          selectedRetiroType,
+          retiroForm,
+          tipoSolicitud: 'retiro', // Identificador para el tipo de solicitud
         }),
       });
 
       const data = await response.json();
       if (response.ok) {
-        alert(
-          'Solicitud de retiro enviada correctamente. Será revisada en breve.'
-        );
+        alert('Solicitud de retiro enviada correctamente. Recibirás una respuesta en los próximos días hábiles.');
         setRetiroForm({ amount: '', reason: '' });
         setShowRetiroFormModal(false);
         setSelectedRetiroType('');
       } else {
-        throw new Error(data.error || 'Error al enviar la solicitud');
+        throw new Error(data.error || 'Error al enviar el correo');
       }
     } catch (error) {
       console.error('Error al enviar la solicitud de retiro:', error);
-      alert('No se pudo enviar la solicitud. Inténtalo más tarde.');
+      alert('Error al enviar la solicitud. Inténtalo nuevamente.');
     }
   };
 
   useEffect(() => {
-    // Si el backend ya devuelve el avatar en userData, úsalo
     if (userData?.avatar) {
       setAvatar(userData.avatar);
     }
-    // Si no, puedes hacer una petición para obtenerlo
-    // Pero lo ideal es que ya venga en `userData`
   }, [userData?.avatar]);
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 px-4 py-8">
@@ -367,6 +291,13 @@ export default function DashboardContent({
               icon="🏢"
               color="from-purple-500 to-purple-600"
               description="Aporte de la empresa"
+            />
+            <DashboardCard
+              title="Aporte Voluntario"
+              value={formatNumber(haberData?.aporteV)}
+              icon="🎯"
+              color="from-indigo-500 to-indigo-600"
+              description="Aporte adicional voluntario"
             />
           </div>
         </div>
@@ -731,9 +662,7 @@ export default function DashboardContent({
 
 function DashboardCard({ title, value, icon, color, description }) {
   return (
-    <div
-      className={`bg-gradient-to-r ${color} text-white p-6 rounded-2xl shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105`}
-    >
+    <div className={`bg-gradient-to-r ${color} text-white p-6 rounded-2xl shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105`}>
       <div className="flex justify-between items-start">
         <div>
           <p className="text-sm opacity-90">{title}</p>
@@ -758,16 +687,12 @@ function DetailItem({ label, value }) {
 function InputField({ label, name, value, onChange, type = 'text' }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1.5">
-        {label}
-      </label>
+      <label className="block text-sm font-medium text-gray-700 mb-1.5">{label}</label>
       <input
         type={type}
         name={name}
         value={value}
-        onChange={(e) =>
-          onChange((prev) => ({ ...prev, [name]: e.target.value }))
-        }
+        onChange={(e) => onChange((prev) => ({ ...prev, [name]: e.target.value }))}
         className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none focus:border-transparent transition"
       />
     </div>
@@ -778,37 +703,14 @@ function EditModal({ form, setForm, onSave, onCancel }) {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-7">
-        <h3 className="text-2xl font-bold text-gray-800 mb-6">
-          ✏️ Editar Datos
-        </h3>
+        <h3 className="text-2xl font-bold text-gray-800 mb-6">✏️ Editar Datos</h3>
         <div className="space-y-5">
-          <InputField
-            label="Teléfono"
-            name="Telefonos"
-            value={form.Telefonos}
-            onChange={setForm}
-          />
-          <InputField
-            label="Email"
-            name="Email"
-            value={form.Email}
-            onChange={setForm}
-            type="email"
-          />
+          <InputField label="Teléfono" name="Telefonos" value={form.Telefonos} onChange={setForm} />
+          <InputField label="Email" name="Email" value={form.Email} onChange={setForm} type="email" />
         </div>
         <div className="flex justify-end gap-4 mt-8">
-          <button
-            onClick={onCancel}
-            className="px-6 py-2.5 bg-gray-500 text-white rounded-xl hover:bg-gray-600 transition"
-          >
-            Cancelar
-          </button>
-          <button
-            onClick={onSave}
-            className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition shadow"
-          >
-            Guardar
-          </button>
+          <button onClick={onCancel} className="px-6 py-2.5 bg-gray-500 text-white rounded-xl hover:bg-gray-600 transition">Cancelar</button>
+          <button onClick={onSave} className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition shadow">Guardar</button>
         </div>
       </div>
     </div>

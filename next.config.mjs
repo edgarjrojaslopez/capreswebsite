@@ -1,9 +1,12 @@
 // next.config.mjs
 const nextConfig = {
   experimental: {
-    serverActions: true,
-    serverComponentsExternalPackages: ['mysql2'],
+    serverActions: {
+      // Configuración específica para server actions
+      bodySizeLimit: '2mb'
+    }
   },
+  serverExternalPackages: ['mysql2'],
   reactStrictMode: false,
   images: {
     remotePatterns: [

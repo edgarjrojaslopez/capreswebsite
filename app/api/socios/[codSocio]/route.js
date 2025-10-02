@@ -5,40 +5,28 @@ import { ApiError } from '@/lib/api/error';
 import { db } from '@/lib/db';
 import { socios } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
-import { jwtVerify } from 'jose';
-
-const JWT_SECRET = process.env.JWT_SECRET;
+import { auth } from '@/auth'; // Importar el helper de NextAuth
 
 async function updateSocioHandler(req) {
-  // Obtener codSocio de la URL
-  const url = new URL(req.url);
-  const codSocio = url.pathname.split('/').pop();
-
-  // Verificar token
-  const authHeader = req.headers.get('Authorization');
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+  // 1. Obtener la sesión del usuario de forma segura
+  const session = await auth();
+  if (!session?.user?.id) {
     throw new ApiError('No autorizado', { status: 401 });
   }
 
-  const token = authHeader.split(' ')[1];
-  let decoded;
-  try {
-    const secret = new TextEncoder().encode(JWT_SECRET);
-    const { payload } = await jwtVerify(token, secret);
-    decoded = payload;
-  } catch (err) {
-    throw new ApiError('Token inválido', { status: 401 });
-  }
+  // 2. Obtener codSocio de la URL
+  const url = new URL(req.url);
+  const codSocio = url.pathname.split('/').pop();
 
-  // Verificar que el socio solo pueda editar sus propios datos
-  if (decoded.cedula !== codSocio) {
+  // 3. Verificar que el socio solo pueda editar sus propios datos
+  // O que sea un administrador
+  if (session.user.id !== codSocio && session.user.rol !== 'admin') {
     throw new ApiError('No autorizado para editar estos datos', { status: 403 });
   }
 
-  // Obtener datos del body
+  // 4. Obtener y validar datos del body
   const { Telefonos, Email } = await req.json();
 
-  // Validar que solo se envíen campos permitidos
   const allowedFields = {};
   if (Telefonos !== undefined) allowedFields.Telefonos = Telefonos;
   if (Email !== undefined) allowedFields.Email = Email;
@@ -47,7 +35,7 @@ async function updateSocioHandler(req) {
     throw new ApiError('No hay campos válidos para actualizar', { status: 400 });
   }
 
-  // Actualizar en la base de datos
+  // 5. Actualizar en la base de datos
   await db
     .update(socios)
     .set(allowedFields)

@@ -6,6 +6,9 @@ import { socios } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import bcrypt from 'bcryptjs';
 
+if (!process.env.NEXTAUTH_SECRET) {
+  throw new Error('NEXTAUTH_SECRET is not set in the environment variables');
+}
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
     CredentialsProvider({
@@ -51,7 +54,25 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             throw new Error('Contraseña incorrecta');
           }
 
-          console.log('✅ Autenticación exitosa para:', foundUser.CodSocio);
+          // Detectar si la contraseña es la predeterminada
+          let mustChangePassword = false;
+          if (await bcrypt.compare('password123', foundUser.password)) {
+            mustChangePassword = true;
+            console.log('🔄 Usuario con contraseña por defecto detectado, debe cambiar contraseña');
+
+            // ⚠️ BLOQUEAR autenticación completa con contraseña por defecto
+            // Redirigir directamente a cambiar contraseña sin permitir acceso completo
+            return {
+              id: foundUser.CodSocio,
+              name: foundUser.NombreCompleto,
+              email: foundUser.Email || `${foundUser.CodSocio}@capres.com`,
+              image: null,
+              rol: foundUser.rol || 'socio',
+              mustChangePassword: true,
+              forcePasswordChange: true, // Flag especial para indicar que debe cambiar contraseña
+              redirectTo: '/change-password' // Página existente para cambio de contraseña
+            };
+          }
 
           return {
             id: foundUser.CodSocio,
@@ -59,7 +80,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             email: foundUser.Email || `${foundUser.CodSocio}@capres.com`,
             image: null,
             rol: foundUser.rol || 'socio',
-            mustChangePassword: foundUser.mustChangePassword || false,
+            mustChangePassword: false,
           };
 
         } catch (error) {
@@ -81,6 +102,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     error: '/login?error=signin'
   },
 
+  // Configuración CSRF
+  csrf: {
+    // Habilitar protección CSRF estricta
+    enable: true,
+  },
+
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
@@ -88,6 +115,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.name = user.name;
         token.rol = user.rol;
         token.mustChangePassword = user.mustChangePassword;
+        token.forcePasswordChange = user.forcePasswordChange;
+        token.redirectTo = user.redirectTo;
+        token.accessToken = user.id; // Añadir el ID del usuario como accessToken
       }
       return token;
     },
@@ -98,6 +128,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.name = token.name;
         session.user.rol = token.rol;
         session.user.mustChangePassword = token.mustChangePassword;
+        session.user.forcePasswordChange = token.forcePasswordChange;
+        session.user.redirectTo = token.redirectTo;
+        session.accessToken = token.accessToken; // Pasar el accessToken a la sesión
       }
       return session;
     },

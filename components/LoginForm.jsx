@@ -57,7 +57,7 @@ export default function LoginForm() {
       }
 
       if (result?.ok) {
-        console.log('✅ Login exitoso, redirigiendo al dashboard');
+        console.log('✅ Login exitoso, verificando estado de contraseña...');
 
         // Verificar que la sesión se estableció correctamente antes de redirigir
         let retries = 0;
@@ -67,7 +67,24 @@ export default function LoginForm() {
           try {
             const session = await getSession();
             if (session?.user) {
-              console.log('✅ Sesión confirmada, redirigiendo...');
+              console.log('✅ Sesión confirmada');
+
+              // Verificar si el usuario debe cambiar la contraseña directamente (contraseña por defecto)
+              if (session.user.forcePasswordChange) {
+                console.log('🔐 Usuario con contraseña por defecto, redirigiendo a cambio obligatorio');
+                router.push('/change-password');
+                return;
+              }
+
+              // Verificar si el usuario debe cambiar la contraseña (otros casos)
+              if (session.user.mustChangePassword) {
+                console.log('🔄 Usuario debe cambiar contraseña, redirigiendo a página de cambio');
+                router.push('/change-password');
+                return;
+              }
+
+              // Usuario normal, redirigir al dashboard
+              console.log('✅ Usuario con contraseña normal, redirigiendo al dashboard');
               router.push('/dashboard');
               return;
             }

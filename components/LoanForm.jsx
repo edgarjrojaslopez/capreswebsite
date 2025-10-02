@@ -60,6 +60,7 @@ export default function LoanForm({ userId, username }) {
         <div className="mb-4">
           <label className="block text-sm font-medium mb-1">
             Tipo de Préstamo
+            (Luego de solicitar el préstamo, debe esperar un lapso de entre 24 y 48 horas para revisar su cuenta de nómina)
           </label>
           <select
             value={loanType}
