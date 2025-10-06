@@ -162,28 +162,39 @@ export default function DashboardContent({
   };
 
   const handleRetiroSubmit = async () => {
-    if (!retiroForm.amount || !retiroForm.reason) {
+    if ((selectedRetiroType.id === 'parcial' && !retiroForm.amount) || !retiroForm.reason) {
       alert('Por favor completa todos los campos');
       return;
     }
 
     try {
+      const monto = selectedRetiroType.id === 'parcial'
+        ? parseFloat(retiroForm.amount)
+        : disponibleNeto;
+
+      const requestBody = {
+        to: process.env.NEXT_PUBLIC_EMAIL_TO,
+        subject: `Solicitud de Retiro ${selectedRetiroType.name} - ${userData.NombreCompleto}`,
+        userData,
+        tipoSolicitud: 'retiro',
+        tipoRetiro: selectedRetiroType.name,
+        montoSolicitado: monto,
+        razon: retiroForm.reason,
+      };
+
+      console.log('Enviando solicitud:', JSON.stringify(requestBody, null, 2));
+
       const response = await fetch('/api/send-email', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          to: process.env.NEXT_PUBLIC_EMAIL_TO,
-          subject: `Solicitud de ${selectedRetiroType.name} - ${userData.NombreCompleto}`,
-          userData,
-          selectedRetiroType,
-          retiroForm,
-          tipoSolicitud: 'retiro', // Identificador para el tipo de solicitud
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       const data = await response.json();
+      console.log('Respuesta del servidor:', data);
+
       if (response.ok) {
         alert('Solicitud de retiro enviada correctamente. Recibirás una respuesta en los próximos días hábiles.');
         setRetiroForm({ amount: '', reason: '' });
@@ -1073,7 +1084,7 @@ function RetiroTypeModal({
   const tipos = [
     {
       id: 'parcial',
-      name: 'Retiro Parcial',
+      name: 'Parcial',
       description: 'Hasta el 80% de tus haberes totales',
       icon: '💰',
       maxAmount:
@@ -1083,7 +1094,7 @@ function RetiroTypeModal({
     },
     {
       id: 'total',
-      name: 'Retiro Total',
+      name: 'Total',
       description: 'Saldo completo (baja del sistema)',
       icon: '🏦',
       maxAmount: disponibleNeto === 0 ? 'No disponible' : 'Total disponible',

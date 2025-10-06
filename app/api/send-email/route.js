@@ -68,8 +68,61 @@ export async function POST(request) {
       html = `
         <!DOCTYPE html>
         <html lang="es">
-        <head><title>Solicitud de Retiro</title></head>
-        <body>... Contenido del correo de retiro ...</body>
+        <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Solicitud de Retiro</title>
+      <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background-color: #1e40af; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
+        .content { padding: 20px; background-color: #f9fafb; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 8px 8px; }
+        .detail { margin-bottom: 15px; }
+        .label { font-weight: bold; color: #4b5563; }
+        .footer { margin-top: 20px; font-size: 12px; color: #6b7280; text-align: center; }
+        .tracking { background-color: #e0f2fe; padding: 10px; border-radius: 4px; margin: 15px 0; text-align: center; font-weight: bold; }
+      </style>
+    </head>
+        <body>      <div class="container">
+        <div class="header">
+          <h1>Solicitud de Retiro de Haberes</h1>
+        </div>
+        <div class="content">
+          <p>Se ha recibido una nueva solicitud de retiro de haberes con los siguientes detalles:</p>
+
+          <div class="tracking">
+            Número de Seguimiento: ${numeroSeguimiento}
+          </div>
+
+          <div class="detail">
+            <span class="label">Socio:</span> ${userData.NombreCompleto}
+          </div>
+          <div class="detail">
+            <span class="label">Cédula:</span> ${userData.CodSocio}
+          </div>
+          <div class="detail">
+            <span class="label">Tipo de Retiro:</span> ${tipoRetiro}
+          </div>
+          <div class="detail">
+            <span class="label">Monto Solicitado:</span> Bs. ${parseFloat(montoSolicitado).toFixed(2)}
+          </div>
+          <div class="detail">
+            <span class="label">Razón del Retiro:</span><br>
+            ${razon}
+          </div>
+          <div class="detail">
+            <span class="label">Correo Electrónico:</span> ${userData.Email}
+          </div>
+          <div class="detail">
+            <span class="label">Teléfono:</span> ${userData.Telefonos || 'No especificado'}
+          </div>
+
+          <div class="footer">
+            <p>Este es un correo automático, por favor no responder a este mensaje.</p>
+            <p>© ${new Date().getFullYear()} CAPRES - Caja de Ahorro de los Profesores</p>
+          </div>
+        </div>
+      </div></body>
         </html>
       `; // Simplificado por brevedad
 

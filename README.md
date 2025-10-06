@@ -1,20 +1,26 @@
 # 💰 CAPRES - Caja de Ahorros del SENIAT
 
-Este es el repositorio del sistema web para **CAPRES**, una caja de ahorros para empleados del SENIAT.
+Sistema web para la gestión de la Caja de Ahorros del Personal del SENIAT (CAPRES), que permite a los socios realizar consultas de saldo, solicitar préstamos y retiros de manera segura.
 
-## Tecnologías usadas
+## 🚀 Características Principales
 
-- Next.js App Router
-- MySQL
-- Drizzle ORM
-- JWT
-- Zod (validaciones)
-- JS puro (sin TypeScript)
+- Autenticación segura con JWT
+- Consulta de saldo y movimientos
+- Solicitud de préstamos
+- Solicitud de retiros (parciales y totales)
+- Panel de administración
+- Gestión de noticias
+- Importación masiva de datos
 
-## Instalación
+## 🛠️ Requisitos del Sistema
 
-1. Clona este repositorio
-2. Ejecuta npm install
-3. Crea tu base de datos MySQL
-4. Configura las variables de entorno
-5. Corre npm run dev
+- Node.js 18+
+- MySQL 8.0+
+- npm 9+
+
+## 🚀 Instalación
+
+1. Clonar el repositorio:
+   ```bash
+   git clone [url-del-repositorio]
+   cd capreswebsite
