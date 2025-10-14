@@ -23,11 +23,12 @@ export default function AboutPage() {
             transparencia, la responsabilidad social y el desarrollo sostenible
             de nuestros socios.
           </p>
-          <p>
-            Actualmente contamos con más de 4.500 socios activos y ofrecemos una
-            amplia gama de productos y servicios financieros diseñados
+          <p className="mb-4">
+            Actualmente contamos con más de 4.500 socios activos y ofrecemos servicios financieros diseñados
             específicamente para el colectivo SENIAT.
           </p>
+          <p className="mb-4">Además, es oportuno hacer de tu conocimiento que al estar inscrito en la Caja de Ahorro, el SENIAT (patrono), se obliga a depositarte un monto adicional del <span className="font-bold">12% de tu sueldo.</span></p>
+          <p className="mb-4 text-xl font-semibold text-center">Si piensas en un mejor futuro: inscríbete en la Caja de Ahorro - CAPRES.</p>
         </div>
       </section>
 

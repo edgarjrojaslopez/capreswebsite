@@ -20,11 +20,27 @@ export default function DelegatesPage() {
     },
 
     {
-      region: 'Aduana Marítima de Maracaibo',
+      region: 'Aduana Marítima',
+
+      nombre: 'Gregoria Flores',
+
+      cedula: '7.702.986',
+    },
+
+    {
+      region: 'Tributos Internos',
 
       nombre: 'Anelsis Quintero',
 
       cedula: '7.713.948',
+    },
+
+    {
+      region: 'Aduana de Maturín',
+
+      nombre: 'Milexis Veliz',
+
+      cedula: '9.926.228',
     },
 
     {

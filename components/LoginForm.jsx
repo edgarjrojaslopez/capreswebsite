@@ -172,12 +172,7 @@ export default function LoginForm() {
           >
             ¿Olvidaste tu contraseña?
           </a>
-          <div className="text-sm text-gray-600">
-            ¿No tienes cuenta?{' '}
-            <a href="/registro" className="text-blue-600 hover:underline">
-              Regístrate aquí
-            </a>
-          </div>
+
         </div>
       </form>
     </div>

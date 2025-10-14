@@ -17,9 +17,7 @@ export default function LoansPage() {
             CAPRES, podrá conceder a los Asociados que tengan una antigüedad
             igual o mayor a seis (6) meses las siguientes clases de préstamo: a)
             Préstamos a corto plazo; b) Préstamos a mediano plazo; c) Préstamos
-            a largo plazo. Cualquier otro tipo de préstamo, debidamente aprobado
-            por las Asambleas, previa presentación del Reglamento respectivo a
-            la Superintendencia de Cajas de Ahorro.
+            a largo plazo.
           </p>
         </div>
         <br />

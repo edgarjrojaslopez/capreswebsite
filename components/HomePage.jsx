@@ -65,7 +65,7 @@ export default function HomePage() {
           </h3>
           <p className="text-gray-600 leading-relaxed">
             Ser la principal opción financiera para los empleados del SENIAT,
-            reconociendo por nuestra solidez, innovación y servicio
+            caracterizada por nuestra solidez, innovación y servicio
             personalizado.
           </p>
         </div>

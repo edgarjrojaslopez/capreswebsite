@@ -1,4 +1,4 @@
-export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
 import { db } from '@/lib/db';
 import { haberes, prestamos } from '@/lib/db/schema';
@@ -7,8 +7,8 @@ import { NextResponse } from 'next/server';
 
 export async function GET(request) {
   try {
-    const url = new URL(request.url);
-    const userId = url.searchParams.get('userId') || '10380699';
+    const { searchParams } = new URL(request.url);
+    const userId = searchParams.get('userId') || '10380699';
 
     console.log('🔍 Verificando datos financieros para usuario:', userId);
 

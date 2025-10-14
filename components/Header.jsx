@@ -40,7 +40,6 @@ export default function Header() {
                   fill
                   sizes="(max-width: 768px) 48px, 64px"
                   className="object-contain"
-                  priority
                 />
               </div>
             </Link>
@@ -160,20 +159,14 @@ export default function Header() {
 
               {showMenu && (
                 <div className="absolute right-0 mt-2 w-48 bg-white text-gray-800 rounded shadow-lg z-10">
-                  <Link
+<Link
                     href="/dashboard"
                     className="block w-full text-left px-4 py-2 hover:bg-gray-100"
                     onClick={() => setShowMenu(false)}
                   >
                     Dashboard
                   </Link>
-                  <Link
-                    href="/loans/request"
-                    className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-                    onClick={() => setShowMenu(false)}
-                  >
-                    Solicitar Préstamo
-                  </Link>
+
                   <button
                     onClick={handleLogout}
                     className="block w-full text-left px-4 py-2 hover:bg-gray-100 w-full text-left text-red-600 hover:text-red-700"
@@ -286,13 +279,7 @@ export default function Header() {
                   >
                     Dashboard
                   </Link>
-                  <Link
-                    href="/loans/request"
-                    className="hover:underline"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    Solicitar Préstamo
-                  </Link>
+
                   <button
                     onClick={handleLogout}
                     className="text-left hover:underline text-red-300 hover:text-red-200"

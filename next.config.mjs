@@ -3,10 +3,12 @@ const nextConfig = {
   experimental: {
     serverActions: {
       // Configuración específica para server actions
-      bodySizeLimit: '2mb'
+      bodySizeLimit: '2mb',
+      allowedOrigins: ['localhost:3000']
     }
   },
-  serverExternalPackages: ['mysql2'],
+  // Configuración para paquetes externos
+  transpilePackages: ['mysql2'],
   reactStrictMode: false,
   images: {
     remotePatterns: [

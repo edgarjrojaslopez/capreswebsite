@@ -1,5 +1,4 @@
-export const runtime = 'nodejs';
-
+export const dynamic = 'force-dynamic';
 import { db } from '@/lib/db';
 import { socios, haberes, prestamos } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
@@ -7,8 +6,8 @@ import { NextResponse } from 'next/server';
 
 export async function GET(request) {
   try {
-    const url = new URL(request.url);
-    const userId = url.searchParams.get('userId');
+    const { searchParams } = new URL(request.url);
+    const userId = searchParams.get('userId');
 
     console.log('🔍 API Dashboard - Solicitud recibida');
     console.log('🔍 URL completa:', request.url);

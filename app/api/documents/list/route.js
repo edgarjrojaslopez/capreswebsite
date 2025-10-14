@@ -5,14 +5,14 @@ import path from 'path';
 export async function GET() {
   try {
     const baseDirectory = path.join(process.cwd(), 'public/assets/files');
-    
+
     // Definir las categorías y sus nombres descriptivos
     const categories = {
       marco_legal: {
         folder: 'marco_legal',
         documents: {
-          'estatutos.pdf': 'Estatutos de la Caja de Ahorros',
-          'ley_de_cajas_de_ahorro.pdf': 'Ley de Cajas de Ahorro'
+          'ley_de_cajas_de_ahorro.pdf': 'Ley de Cajas de Ahorro',
+          'estatutos.pdf': 'Estatuto de la Caja de Ahorros'
         }
       },
       operaciones: {
@@ -46,11 +46,11 @@ export async function GET() {
     if (fs.existsSync(marcoLegalPath)) {
       const files = fs.readdirSync(marcoLegalPath);
       const pdfFiles = files.filter(file => file.toLowerCase().endsWith('.pdf'));
-      
+
       result.marcoLegal = pdfFiles.map(filename => {
         const filePath = path.join(marcoLegalPath, filename);
         const stats = fs.statSync(filePath);
-        
+
         return {
           filename,
           name: categories.marco_legal.documents[filename] || filename.replace('.pdf', ''),
@@ -65,11 +65,11 @@ export async function GET() {
     if (fs.existsSync(operacionesPath)) {
       const files = fs.readdirSync(operacionesPath);
       const pdfFiles = files.filter(file => file.toLowerCase().endsWith('.pdf'));
-      
+
       result.operaciones = pdfFiles.map(filename => {
         const filePath = path.join(operacionesPath, filename);
         const stats = fs.statSync(filePath);
-        
+
         return {
           filename,
           name: categories.operaciones.documents[filename] || filename.replace('.pdf', ''),
@@ -82,8 +82,8 @@ export async function GET() {
     return NextResponse.json({ documents: result });
   } catch (error) {
     console.error('Error listando documentos:', error);
-    return NextResponse.json({ 
-      documents: { marcoLegal: [], operaciones: [] } 
+    return NextResponse.json({
+      documents: { marcoLegal: [], operaciones: [] }
     }, { status: 500 });
   }
 }

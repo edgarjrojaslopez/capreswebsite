@@ -1,4 +1,4 @@
-export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
 import { auth } from '@/auth';
 import { NextResponse } from 'next/server';
@@ -18,13 +18,14 @@ export async function GET(request) {
 
     if (!session?.user) {
       console.log('❌ No hay sesión del servidor');
+      const headers = new Headers(request.headers);
       return NextResponse.json({
         error: 'No hay sesión del servidor',
         session: null,
         debug: {
           timestamp: new Date().toISOString(),
-          userAgent: request.headers.get('user-agent'),
-          cookies: request.headers.get('cookie')
+          hasUserAgent: headers.has('user-agent'),
+          hasCookies: headers.has('cookie')
         }
       });
     }

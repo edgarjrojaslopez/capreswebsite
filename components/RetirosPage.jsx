@@ -115,35 +115,7 @@ export default function RetirosPageContent() {
               </li>
             </ul>
           </div>
-          <div className="bg-white p-6 rounded-lg shadow mb-6">
-            <p className="mb-2">
-              <strong>Causales permitidas para el retiro parcial</strong>:
-            </p>
-            <ul className="list-disc ml-4">
-              <li>
-                Cancelación de gravamen sobre la{' '}
-                <strong>vivienda principal</strong>.
-              </li>
-              <li>
-                <strong>Reparación o ampliación</strong> de la vivienda
-                principal.
-              </li>
-              <li>
-                <strong>Gastos médicos u odontológicos</strong> no cubiertos por
-                el seguro del SENIAT, aplicables al asociado, cónyuge,
-                concubino(a), padres o hijos dependientes.
-              </li>
-              <li>
-                <strong>Gastos educativos</strong> del asociado, su pareja o sus
-                descendientes.
-              </li>
-              <li>
-                Cualquier otra circunstancia{' '}
-                <strong>debidamente comprobada y aceptada</strong> por el
-                Consejo de Administración
-              </li>
-            </ul>
-          </div>
+
         </ol>
       </section>
     </div>
