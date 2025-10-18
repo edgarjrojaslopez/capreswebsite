@@ -17,6 +17,17 @@ export default async function Login({ searchParams }) {
         )}
 
         <LoginForm />
+        <div className="mt-4 text-center">
+          <p className="text-sm text-gray-600">
+            ¿Primera vez?{' '}
+            <a
+              href="/register"
+              className="font-medium text-blue-600 hover:text-blue-500"
+            >
+              Regístrate aquí
+            </a>
+          </p>
+        </div>
       </div>
     </div>
   );

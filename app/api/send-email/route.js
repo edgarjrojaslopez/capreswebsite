@@ -203,8 +203,79 @@ export async function POST(request) {
         </body>
         </html>
       `;
+    } else if (tipoSolicitud === 'registro') {
+      // --- Lógica de Registro ---
+      // No se requiere número de seguimiento ni guardar en DB (ya se hizo en /api/register)
+      numeroSeguimiento = null;
+
+      // --- PLANTILLA DE CORREO PARA REGISTRO ---
+      html = `
+        <!DOCTYPE html>
+        <html lang="es">
+        <head>
+          <meta charset="UTF-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Bienvenido a CAPRES</title>
+        </head>
+        <body style="margin:0; padding:0; background:#f4f6f9; font-family:Arial,sans-serif;">
+          <table width="100%" cellpadding="0" cellspacing="0" style="max-width:700px; margin:30px auto; background:#ffffff; border-radius:12px; overflow:hidden; box-shadow:0 4px 12px rgba(0,0,0,0.1);">
+            <!-- CABECERA -->
+            <tr>
+              <td bgcolor="#10b981" style="padding:30px 40px; text-align:center; color:white;">
+                <div style="font-size:28px; margin-bottom:8px;">🎉</div>
+                <h1 style="margin:0; font-size:24px; color:white;">¡Bienvenido a CAPRES!</h1>
+                <p style="margin:8px 0 0; color:#d1fae5; font-size:14px;">Registro Exitoso</p>
+              </td>
+            </tr>
+            <!-- CUERPO -->
+            <tr>
+              <td style="padding:40px;">
+                <p style="font-size:16px; color:#1e293b; margin-bottom:20px;">
+                  Hola <strong>${userData.nombre}</strong>,
+                </p>
+                <p style="font-size:14px; color:#475569; line-height:1.6; margin-bottom:20px;">
+                  Tu registro en el sistema de CAPRES se ha completado exitosamente. A partir de ahora podrás acceder a tu cuenta y gestionar tus solicitudes de préstamos y retiros.
+                </p>
+                
+                <div style="background:#f0fdf4; padding:20px; border-radius:8px; border-left:4px solid #10b981; margin:20px 0;">
+                  <h2 style="color:#166534; font-size:16px; margin:0 0 12px;">📋 Datos de tu cuenta</h2>
+                  <table width="100%" style="font-size:14px; color:#1e293b;">
+                    <tr><td width="30%"><strong>Cédula:</strong></td><td>${userData.cedula}</td></tr>
+                    <tr><td><strong>Email:</strong></td><td>${userData.email}</td></tr>
+                  </table>
+                </div>
+
+                <p style="font-size:14px; color:#475569; line-height:1.6; margin:20px 0;">
+                  Ya puedes iniciar sesión en el sistema utilizando tu cédula y la contraseña que creaste durante el registro.
+                </p>
+
+                <div style="text-align:center; margin:30px 0;">
+                  <a href="${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/login" 
+                     style="display:inline-block; background:#1e40af; color:white; padding:12px 30px; text-decoration:none; border-radius:6px; font-weight:bold;">
+                    Iniciar Sesión
+                  </a>
+                </div>
+
+                <div style="background:#fef3c7; padding:15px; border-radius:6px; border-left:4px solid #f59e0b; margin-top:20px;">
+                  <p style="margin:0; font-size:13px; color:#92400e;">
+                    <strong>⚠️ Importante:</strong> Si no solicitaste este registro, por favor contacta inmediatamente con la administración de CAPRES.
+                  </p>
+                </div>
+              </td>
+            </tr>
+            <!-- PIE -->
+            <tr>
+              <td style="text-align:center; padding:20px; background:#f8fafc; color:#64748b; font-size:12px; border-top:1px solid #e2e8f0;">
+                <p style="margin:0 0 8px;">Este mensaje fue generado automáticamente.</p>
+                <p style="margin:0;">&copy; ${new Date().getFullYear()} CAPRES - Caja de Ahorro de los Profesores. Todos los derechos reservados.</p>
+              </td>
+            </tr>
+          </table>
+        </body>
+        </html>
+      `;
     } else {
-      // Si el tipo de solicitud no es ni 'retiro' ni 'prestamo'
+      // Si el tipo de solicitud no es reconocido
       return Response.json({ error: 'Tipo de solicitud no reconocido' }, { status: 400 });
     }
 
@@ -212,7 +283,7 @@ export async function POST(request) {
     const mailOptions = {
       from: DEFAULT_FROM,
       to: Array.isArray(to) ? to : [to],
-      subject: `${subject} [${numeroSeguimiento}]`,
+      subject: numeroSeguimiento ? `${subject} [${numeroSeguimiento}]` : subject,
       html,
     };
 
