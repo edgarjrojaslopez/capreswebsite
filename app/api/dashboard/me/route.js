@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { db } from '@/lib/db';
-import { socios, haberes, prestamos } from '@/lib/db/schema';
-import { eq } from 'drizzle-orm';
+import { socios, haberes, prestamos, retirosHaberes } from '@/lib/db/schema';
+import { eq, desc } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
 
 export async function GET(request) {
@@ -86,9 +86,23 @@ export async function GET(request) {
     console.log('🔍 Préstamos encontrados:', prestamosData.length);
     console.log('🔍 Datos de préstamos:', prestamosData);
 
-    // 4. Ensamblar y devolver el payload completo
+    // 4. Obtener el último retiro de haberes del socio
+    console.log('🔍 Buscando último retiro para usuario:', user.CodSocio);
+    const ultimoRetiro = await db
+      .select()
+      .from(retirosHaberes)
+      .where(eq(retirosHaberes.CodSocio, user.CodSocio))
+      .orderBy(desc(retirosHaberes.FecRetiro))
+      .limit(1);
+
+    console.log('🔍 Último retiro encontrado:', ultimoRetiro[0] || 'Ninguno');
+
+    // 5. Ensamblar y devolver el payload completo
     const responsePayload = {
-      socio: userWithoutPassword,
+      socio: {
+        ...userWithoutPassword,
+        ultimoRetiro: ultimoRetiro[0]?.FecRetiro || null,
+      },
       haberes: haberesData,
       prestamos: prestamosData,
     };

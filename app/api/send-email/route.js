@@ -236,7 +236,7 @@ export async function POST(request) {
                 <p style="font-size:14px; color:#475569; line-height:1.6; margin-bottom:20px;">
                   Tu registro en el sistema de CAPRES se ha completado exitosamente. A partir de ahora podrás acceder a tu cuenta y gestionar tus solicitudes de préstamos y retiros.
                 </p>
-                
+
                 <div style="background:#f0fdf4; padding:20px; border-radius:8px; border-left:4px solid #10b981; margin:20px 0;">
                   <h2 style="color:#166534; font-size:16px; margin:0 0 12px;">📋 Datos de tu cuenta</h2>
                   <table width="100%" style="font-size:14px; color:#1e293b;">
@@ -250,7 +250,7 @@ export async function POST(request) {
                 </p>
 
                 <div style="text-align:center; margin:30px 0;">
-                  <a href="${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/login" 
+                  <a href="${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/login"
                      style="display:inline-block; background:#1e40af; color:white; padding:12px 30px; text-decoration:none; border-radius:6px; font-weight:bold;">
                     Iniciar Sesión
                   </a>
@@ -267,7 +267,7 @@ export async function POST(request) {
             <tr>
               <td style="text-align:center; padding:20px; background:#f8fafc; color:#64748b; font-size:12px; border-top:1px solid #e2e8f0;">
                 <p style="margin:0 0 8px;">Este mensaje fue generado automáticamente.</p>
-                <p style="margin:0;">&copy; ${new Date().getFullYear()} CAPRES - Caja de Ahorro de los Profesores. Todos los derechos reservados.</p>
+                <p style="margin:0;">&copy; ${new Date().getFullYear()} CAPRES - Caja de Ahorro y prestaciones de los trabajadores del SENIAT. Todos los derechos reservados.</p>
               </td>
             </tr>
           </table>

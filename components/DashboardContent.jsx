@@ -39,6 +39,19 @@ export default function DashboardContent({
     return new Intl.DateTimeFormat('es-VE', { day: '2-digit', month: 'short', year: 'numeric' }).format(date);
   };
 
+  const isWithinLastYear = (dateString) => {
+    if (!dateString) return false;
+    const lastWithdrawal = new Date(dateString);
+    if (isNaN(lastWithdrawal.getTime())) return false;
+    
+    const oneYearAgo = new Date();
+    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+    
+    return lastWithdrawal > oneYearAgo;
+  };
+  
+  const isRetiroDisabled = isWithinLastYear(userData.ultimoRetiro);
+
   const formatNumber = (value) => {
     return new Intl.NumberFormat('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value || 0);
   };
@@ -572,35 +585,78 @@ export default function DashboardContent({
             Retiro de Haberes
           </h3>
 
-          <div className="text-center py-12 text-gray-500 bg-gray-50 rounded-2xl">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-16 w-16 mx-auto mb-4 opacity-30"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M3 10h18M3 14h18m-9-4v8m-7-4h14a2 2 0 012 2v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4a2 2 0 012-2z"
-              />
-            </svg>
-            <h4 className="text-xl font-medium mb-4">
-              ¿Deseas retirar tus haberes?
-            </h4>
-            <p className="mb-6 max-w-md mx-auto">
-              Puedes solicitar un <strong>retiro parcial</strong> (hasta el 80%
-              de tus haberes) o un <strong>retiro total</strong> (baja del
-              sistema).
-            </p>
-            <button
-              onClick={() => setShowRetiroModal(true)}
-              className="px-8 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold rounded-xl hover:from-green-700 hover:to-green-800 transition-all duration-200 shadow-md hover:shadow-lg"
-            >
-              💵 Solicitar Retiro
-            </button>
+          <div className="space-y-6">
+            {/* Sección de último retiro */}
+            {userData.ultimoRetiro && (
+              <div className="bg-blue-50 border-l-4 border-blue-500 rounded-r-lg p-4 mb-6">
+                <h4 className="text-lg font-medium text-blue-800 mb-2 flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
+                  </svg>
+                  Último Retiro Realizado
+                </h4>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="text-gray-600">Monto Retirado</p>
+                    <p className="font-semibold text-gray-800">{formatNumber(haberData?.retiroH || 0)}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600">Fecha del Retiro</p>
+                    <p className="font-semibold text-gray-800">{formatDate(userData.ultimoRetiro)}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Sección de solicitud de retiro */}
+            <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-2xl">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-16 w-16 mx-auto mb-4 opacity-30"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M3 10h18M3 14h18m-9-4v8m-7-4h14a2 2 0 012 2v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4a2 2 0 012-2z"
+                />
+              </svg>
+              <h4 className="text-xl font-medium mb-4">
+                {isRetiroDisabled ? 'Próximo retiro disponible' : '¿Deseas retirar tus haberes?'}
+              </h4>
+              <p className="mb-6 max-w-md mx-auto">
+                {isRetiroDisabled ? (
+                  <span>Podrás solicitar un nuevo retiro a partir del <span className="font-semibold">{new Date(new Date(userData.ultimoRetiro).setFullYear(new Date(userData.ultimoRetiro).getFullYear() + 1)).toLocaleDateString('es-VE', { day: '2-digit', month: 'long', year: 'numeric' })}</span></span>
+                ) : (
+                  <span>Puedes solicitar un <strong>retiro parcial</strong> (hasta el 80%
+                  de tus haberes) o un <strong>retiro total</strong> (baja del
+                  sistema).</span>
+                )}
+              </p>
+              <div className="relative group">
+                <button
+                  onClick={() => setShowRetiroModal(true)}
+                  disabled={isRetiroDisabled}
+                  className={`px-8 py-3 font-semibold rounded-xl transition-all duration-200 shadow-md ${
+                    isRetiroDisabled 
+                      ? 'bg-gray-300 cursor-not-allowed opacity-70' 
+                      : 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 hover:shadow-lg text-white'
+                  }`}
+                >
+                  💵 {isRetiroDisabled ? 'Retiro no disponible' : 'Solicitar Retiro'}
+                </button>
+                {isRetiroDisabled && userData.ultimoRetiro && (
+                  <div className="absolute z-10 w-72 p-3 text-sm text-gray-700 bg-white border border-gray-200 rounded-lg shadow-lg -left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    <p className="mb-1">Solo puedes realizar un retiro por año.</p>
+                    <p>Tu último retiro fue el <span className="font-semibold">{formatDate(userData.ultimoRetiro)}</span>.</p>
+                    <div className="absolute w-3 h-3 bg-white transform rotate-45 -top-1.5 left-1/2 -ml-1.5 border-t border-l border-gray-200"></div>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </section>
         {/* === MODALES === */}
